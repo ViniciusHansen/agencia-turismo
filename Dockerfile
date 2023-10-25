@@ -11,9 +11,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copie o resto do aplicativo
 COPY app /app
 
+# Copie o run.py para o diretório de trabalho
+#COPY run.py /app/
+
 EXPOSE 5000
 EXPOSE 5432
 
 # Comando para executar o aplicativo Flask
-CMD ["python", "app.py"]
-
+CMD ["python", "run.py"]

@@ -105,6 +105,8 @@ CREATE TABLE IF NOT EXISTS public."Cliente"
 (
     codigo serial NOT NULL,
     nome character varying(127),
+    email character varying (255),
+    senha_hash character varying (255),
     endereco character varying(127),
     fone character varying(15),
     PRIMARY KEY (codigo)
@@ -290,6 +292,22 @@ ALTER TABLE IF EXISTS public."Pacote_Visita"
 
 END;
 
+
+-- Adicionando suporte para imagem na tabela "Cidade"
+ALTER TABLE public."Cidade"
+ADD imagem bytea;
+
+-- Adicionando suporte para imagem na tabela "Ponto Turistico"
+ALTER TABLE public."Ponto Turistico"
+ADD imagem bytea;
+
+-- Adicionando suporte para imagem na tabela "Hotel"
+ALTER TABLE public."Hotel"
+ADD imagem bytea;
+
+-- Adicionando suporte para imagem na tabela "Restaurante"
+ALTER TABLE public."Restaurante"
+ADD imagem bytea;
 
 
 -------- Gatilhos ---------
