@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS public."Cliente"
 (
     codigo serial NOT NULL,
     nome character varying(127),
-    email character varying (255),
+    email character varying (255) unique,
     senha_hash character varying (255),
     endereco character varying(127),
     fone character varying(15),
