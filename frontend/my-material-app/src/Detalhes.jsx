@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import Button from "@mui/material/Button";
-import Autocomplete from "@mui/joy/Autocomplete";
 import useStyles from "./styles";
-import Detalhes from "./Detalhes";
-import SignInSide from "./SignInSide";
-import SignUp from "./SignUp";
 
 import {
   Typography,
@@ -19,26 +15,10 @@ import {
   Container,
 } from "@mui/material";
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const destinos = ["Joinville", "Florianópolis"];
+const cards = [1, 2, 3, 4];
 
-const App = () => {
+const Detalhes = ({ goBack }) => {
   const classes = useStyles();
-  const [viewDetails, setViewDetails] = useState(false);
-  const [viewSignInSide, setViewSignInSide] = useState(false);
-  const [viewSignUp, setViewSignUp] = useState(false);
-
-  if (viewDetails) {
-    return <Detalhes goBack={() => setViewDetails(false)} />;
-  }
-
-  if (viewSignInSide) {
-    return <SignInSide goBack={() => setViewSignInSide(false)} />;
-  }
-
-  if (viewSignUp) {
-    return <SignUp goBack={() => setViewSignUp(false)} />;
-  }
 
   return (
     <>
@@ -46,25 +26,8 @@ const App = () => {
       <AppBar position="relative">
         <Toolbar>
           <Typography variant="h6">Agência de Viagens</Typography>
-          <div style={{ flexGrow: 1 }}></div>
-          <Button
-            color="inherit"
-            variant="outlined"
-            onClick={() => setViewSignInSide(true)}
-          >
-            SignIn
-          </Button>
-          <Button
-            color="inherit"
-            variant="outlined"
-            style={{ marginLeft: "8px" }}
-            onClick={() => setViewSignUp(true)}
-          >
-            SignUp
-          </Button>
         </Toolbar>
       </AppBar>
-
       <main>
         <div className={classes.container}>
           <Container maxWidth="sm">
@@ -74,7 +37,7 @@ const App = () => {
               color="textPrimary"
               gutterBottom
             >
-              Pacotes em Destaque
+              Nome do Pacote
             </Typography>
             <Typography
               variant="h5"
@@ -82,21 +45,8 @@ const App = () => {
               color="textSecondary"
               paragraph
             >
-              Esses são os pacotes disponíveis para reserva.
+              Descrição do Pacote
             </Typography>
-            <div className={classes.button}>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Autocomplete placeholder="Destino" options={destinos} />
-                </Grid>
-
-                <Grid item>
-                  <Button variant="contained" color="primary">
-                    Buscar
-                  </Button>
-                </Grid>
-              </Grid>
-            </div>
           </Container>
         </div>
         <Container className={classes.cardGrid} maxWidth="md">
@@ -122,15 +72,6 @@ const App = () => {
                           grid
                         </Typography>
                       </CardContent>
-                      <CardActions className={classes.buttonVerMais}>
-                        <Button
-                          size="small"
-                          color="primary"
-                          onClick={() => setViewDetails(true)}
-                        >
-                          Ver mais
-                        </Button>
-                      </CardActions>
                     </Grid>
                   </Grid>
                 </Card>
@@ -138,6 +79,20 @@ const App = () => {
             ))}
           </Grid>
         </Container>
+
+        <div className={classes.button}>
+          <Grid container spacing={5} justifyContent="center">
+            <Grid item>
+              <Button variant="contained" color="primary">
+                Reservar
+              </Button>
+              <Button variant="outlined" color="primary" onClick={goBack}>
+                Cancelar
+              </Button>
+            </Grid>
+          </Grid>
+        </div>
+
       </main>
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>
@@ -151,4 +106,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Detalhes;
