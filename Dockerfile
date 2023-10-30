@@ -18,4 +18,4 @@ EXPOSE 5000
 EXPOSE 5432
 
 # Comando para executar o aplicativo Flask
-CMD ["python", "run.py"]
+CMD ["python", "app.py"]

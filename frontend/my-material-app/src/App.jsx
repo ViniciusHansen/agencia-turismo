@@ -3,8 +3,8 @@ import Button from "@mui/material/Button";
 import Autocomplete from "@mui/joy/Autocomplete";
 import useStyles from "./styles";
 import Detalhes from "./Detalhes";
-import SignInSide from "./SignInSide";
-import SignUp from "./SignUp";
+import LoginPage from "./LoginDIY";
+import Register from "./RegisterDIY";
 
 import {
   Typography,
@@ -33,12 +33,13 @@ const App = () => {
   }
 
   if (viewSignInSide) {
-    return <SignInSide goBack={() => setViewSignInSide(false)} />;
+    return <LoginPage goBack={() => setViewSignInSide(false)} onSuccess={() => setViewSignInSide(false)} />;
   }
 
   if (viewSignUp) {
-    return <SignUp goBack={() => setViewSignUp(false)} />;
+      return <Register goBack={() => setViewSignUp(false)} onSuccess={() => setViewSignUp(false)} />;
   }
+
 
   return (
     <>

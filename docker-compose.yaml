@@ -9,6 +9,8 @@ services:
       - ./app:/app
     environment:
       - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_DEBUG=true
+
     depends_on:
       - db
 
@@ -23,6 +25,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./banco.sql:/docker-entrypoint-initdb.d/banco.sql
+
+  frontend:
+    build:
+      context: ./frontend/my-material-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/my-material-app:/app
+      - /app/node_modules
+
+      
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
