@@ -27,24 +27,89 @@ const App = () => {
   const [viewDetails, setViewDetails] = useState(false);
   const [viewSignInSide, setViewSignInSide] = useState(false);
   const [viewSignUp, setViewSignUp] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const [username, setUsername] = useState("");
+
+
+  const handleLogout = () => {
+    // Limpe qualquer armazenamento local ou token de sessão
+    localStorage.removeItem("access_token");
+
+    // Atualize o estado para refletir que o usuário não está mais logado
+    setIsLogged(false);
+    setUsername("");
+
+    // Redirecionar o usuário para a página principal ou qualquer outra página necessária
+    // Por exemplo, usando react-router-dom: history.push('/');
+  };
 
   if (viewDetails) {
     return <Detalhes goBack={() => setViewDetails(false)} />;
   }
 
   if (viewSignInSide) {
-    return <LoginPage goBack={() => setViewSignInSide(false)} onSuccess={() => setViewSignInSide(false)} />;
+    return (
+      <LoginPage
+        goBack={() => setViewSignInSide(false)}
+        onSuccess={() => {
+          setViewSignInSide(false);
+          setIsLogged(true);
+        }}
+        updateUsername={setUsername}
+      />
+    );
   }
 
   if (viewSignUp) {
-      return <Register goBack={() => setViewSignUp(false)} onSuccess={() => setViewSignUp(false)} />;
+    return (
+      <Register
+        goBack={() => setViewSignUp(false)}
+        onSuccess={() => setViewSignUp(false)}
+      />
+    );
   }
-
 
   return (
     <>
       <CssBaseline />
       <AppBar position="relative">
+        <Toolbar>
+          <Typography variant="h6">Agência de Viagens</Typography>
+          <div style={{ flexGrow: 1 }}></div>
+
+          {/* Se o usuário estiver logado, mostre o nome do usuário e o botão de logout */}
+          {isLogged ? (
+            <>
+              <Typography variant="subtitle1" style={{ marginRight: "16px" }}>
+                {username}
+              </Typography>
+              <Button color="inherit" variant="outlined" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={() => setViewSignInSide(true)}
+              >
+                SignIn
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                style={{ marginLeft: "8px" }}
+                onClick={() => setViewSignUp(true)}
+              >
+                SignUp
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      {/* <AppBar position="relative">
         <Toolbar>
           <Typography variant="h6">Agência de Viagens</Typography>
           <div style={{ flexGrow: 1 }}></div>
@@ -64,7 +129,7 @@ const App = () => {
             SignUp
           </Button>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       <main>
         <div className={classes.container}>

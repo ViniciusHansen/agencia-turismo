@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-function Login({goBack, onSuccess}) {
+function Login({ goBack, onSuccess, updateUsername}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+
 
   const login = () => {
     axios
       .post("http://localhost:5000/login", { username, password })
       .then((response) => {
         localStorage.setItem("access_token", response.data.access_token);
+        updateUsername(username);
         setMessage("Logged in successfully");
         onSuccess();
       })
