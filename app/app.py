@@ -19,6 +19,7 @@ db.init_app(app)
 jwt = JWTManager(app)
 
 
+# Mapeamento do Banco de dados para SQLAlchemy
 
 class Pacote(db.Model):
     __tablename__ = 'Pacote'
@@ -208,6 +209,7 @@ def fetch_data(session):
     return turistas
 
 
+# Rotas de comunicação Back-Front
 @app.route("/")
 def hello():
     return "Welcome to Python Flask."
