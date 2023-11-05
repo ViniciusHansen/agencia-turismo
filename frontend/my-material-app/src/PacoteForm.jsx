@@ -74,32 +74,10 @@ const PacoteForm = () => {
       formData.append("cidade_imagem", cidade.cidade_imagem);
     }
 
-    // Adiciona dados dos hotéis ao formData
-    hoteis.forEach((hotel, index) => {
-      formData.append(`hotel_${index}_categoria`, hotel.categoria);
-      if (hotel.imagem) {
-        formData.append(`hotel_${index}_imagem`, hotel.imagem);
-      }
-    });
-
-    // Adiciona dados dos restaurantes ao formData
-    restaurantes.forEach((restaurante, index) => {
-      formData.append(
-        `restaurante_${index}_especialidade`,
-        restaurante.especialidade
-      );
-      if (restaurante.imagem) {
-        formData.append(`restaurante_${index}_imagem`, restaurante.imagem);
-      }
-    });
-
-    // Adiciona dados dos pontos turísticos ao formData
-    pontosTuristicos.forEach((ponto, index) => {
-      formData.append(`pontoTuristico_${index}_desc`, ponto.desc);
-      if (ponto.imagem) {
-        formData.append(`pontoTuristico_${index}_imagem`, ponto.imagem);
-      }
-    });
+    // No cliente React, serialize o hotel, restaurante e ponto turístico como JSON
+    formData.append("hoteis", JSON.stringify(hoteis));
+    formData.append("restaurantes", JSON.stringify(restaurantes));
+    formData.append("pontosTuristicos", JSON.stringify(pontosTuristicos));
 
     // Fetch ou Axios para enviar os dados do formulário para o servidor
     
@@ -201,7 +179,7 @@ const PacoteForm = () => {
         <div key={index}>
           <input
             type="text"
-            name="restaurante_especialidade"
+            name="restaurante_${index}_especialidade"
             value={restaurante.especialidade}
             onChange={(e) => {
               const newRestaurantes = [...restaurantes];
@@ -212,7 +190,7 @@ const PacoteForm = () => {
           />
           <input
             type="file"
-            name="restaurante_imagem"
+            name="restaurante_${index}_imagem"
             onChange={(e) => {
               const newRestaurantes = [...restaurantes];
               newRestaurantes[index].imagem = e.target.files[0];

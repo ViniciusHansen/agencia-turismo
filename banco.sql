@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS public."Hotel"
 
 CREATE TABLE IF NOT EXISTS public."Restaurante"
 (
+    codigo serial NOT NULL,
     especialidade character varying(63),
     preco_medio double precision,
     categoria character varying(63),

@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import base64, os
+import base64, os, json
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -59,9 +59,10 @@ class Visita(db.Model):
 
 class Hotel(db.Model):
     __tablename__ = 'Hotel'
+    codigo = db.Column(db.Integer, primary_key=True)
     categoria = db.Column(db.String)
     codigo_visita = db.Column(db.Integer, db.ForeignKey(
-        'Visita.codigo'), primary_key=True)
+        'Visita.codigo'))
     imagem = db.Column(db.LargeBinary)
 
 
@@ -386,32 +387,40 @@ def add_pacote():
     db.session.add(pacote)
     db.session.add(cidade)
 
+    hoteis_data = json.loads(request.form['hoteis'])
+    restaurantes_data = json.loads(request.form['restaurantes'])
+    pontos_turisticos_data = json.loads(request.form['pontosTuristicos'])
+
     # Processar e salvar hotéis
-    hoteis_dados = request.form.getlist('hoteis')
-    for hotel_dado in hoteis_dados:
+    for index, hotel_dado in enumerate(hoteis_data):
         categoria = hotel_dado['categoria']
-        hotel_imagem = request.files.get(f'hotel_{categoria}_imagem')
+        # Obter imagem associada ao hotel pelo índice
+        hotel_imagem = request.files.get(f'hotel_{index}_imagem')        
         hotel_imagem_blob = hotel_imagem.read() if hotel_imagem else None
-        hotel = Hotel(categoria=categoria, imagem=hotel_imagem_blob, pacote_id=pacote.id)
+        # Criar e salvar o objeto Hotel
+        hotel = Hotel(categoria=categoria, imagem=hotel_imagem_blob)
         db.session.add(hotel)
 
     # Processar e salvar restaurantes
-    restaurantes_dados = request.form.getlist('restaurantes')
-    for restaurante_dado in restaurantes_dados:
+    for index, restaurante_dado in enumerate(restaurantes_data):
         especialidade = restaurante_dado['especialidade']
-        restaurante_imagem = request.files.get(f'restaurante_{especialidade}_imagem')
+        # Obter imagem associada ao restaurante pelo índice
+        restaurante_imagem = request.files.get(f'restaurante_{index}_imagem')
         restaurante_imagem_blob = restaurante_imagem.read() if restaurante_imagem else None
-        restaurante = Restaurante(especialidade=especialidade, imagem=restaurante_imagem_blob, pacote_id=pacote.id)
+        # Criar e salvar o objeto Restaurante
+        restaurante = Restaurante(especialidade=especialidade, imagem=restaurante_imagem_blob)
         db.session.add(restaurante)
 
     # Processar e salvar pontos turísticos
-    pontos_turisticos_dados = request.form.getlist('pontosTuristicos')
-    for ponto_turistico_dado in pontos_turisticos_dados:
+    for index, ponto_turistico_dado in enumerate(pontos_turisticos_data):
         descricao = ponto_turistico_dado['desc']
-        ponto_imagem = request.files.get(f'ponto_{descricao}_imagem')
+        # Obter imagem associada ao ponto turístico pelo índice
+        ponto_imagem = request.files.get(f'pontoTuristico_{index}_imagem')
         ponto_imagem_blob = ponto_imagem.read() if ponto_imagem else None
-        ponto_turistico = PontoTuristico(descricao=descricao, imagem=ponto_imagem_blob, pacote_id=pacote.id)
+        # Criar e salvar o objeto PontoTuristico
+        ponto_turistico = PontoTuristico(desc=descricao, imagem=ponto_imagem_blob)
         db.session.add(ponto_turistico)
+
 
     db.session.commit()  # Salva todas as alterações no banco de dados
 
