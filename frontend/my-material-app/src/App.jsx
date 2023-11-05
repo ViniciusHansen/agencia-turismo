@@ -5,6 +5,7 @@ import useStyles from "./styles";
 import Detalhes from "./Detalhes";
 import LoginPage from "./LoginDIY";
 import Register from "./RegisterDIY";
+import PacoteForm from "./PacoteForm";
 
 import {
   Typography,
@@ -29,7 +30,7 @@ const App = () => {
   const [viewSignUp, setViewSignUp] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [username, setUsername] = useState("");
-
+  const [viewPacoteForm, setViewPacoteForm] = useState(false);
 
   const handleLogout = () => {
     // Limpe qualquer armazenamento local ou token de sessão
@@ -42,6 +43,10 @@ const App = () => {
     // Redirecionar o usuário para a página principal ou qualquer outra página necessária
     // Por exemplo, usando react-router-dom: history.push('/');
   };
+
+  if (viewPacoteForm) {
+    return <PacoteForm goBack={() => setViewPacoteForm(false)} />;
+  }
 
   if (viewDetails) {
     return <Detalhes goBack={() => setViewDetails(false)} />;
@@ -86,6 +91,13 @@ const App = () => {
               <Button color="inherit" variant="outlined" onClick={handleLogout}>
                 Logout
               </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewPacoteForm}
+              >
+                Admin Panel
+              </Button>
             </>
           ) : (
             <>
@@ -108,28 +120,6 @@ const App = () => {
           )}
         </Toolbar>
       </AppBar>
-
-      {/* <AppBar position="relative">
-        <Toolbar>
-          <Typography variant="h6">Agência de Viagens</Typography>
-          <div style={{ flexGrow: 1 }}></div>
-          <Button
-            color="inherit"
-            variant="outlined"
-            onClick={() => setViewSignInSide(true)}
-          >
-            SignIn
-          </Button>
-          <Button
-            color="inherit"
-            variant="outlined"
-            style={{ marginLeft: "8px" }}
-            onClick={() => setViewSignUp(true)}
-          >
-            SignUp
-          </Button>
-        </Toolbar>
-      </AppBar> */}
 
       <main>
         <div className={classes.container}>

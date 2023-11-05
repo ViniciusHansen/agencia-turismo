@@ -293,6 +293,28 @@ ALTER TABLE IF EXISTS public."Pacote_Visita"
 END;
 
 
+
+-- Correção na tabela Hotel
+-- Adicionar a coluna 'codigo' que está faltando na tabela "Hotel"
+ALTER TABLE public."Hotel"
+ADD COLUMN codigo serial PRIMARY KEY;
+
+-- Correções nas tabelas de associação
+-- Alterar o tipo das colunas 'Cliente_codigo' e 'Pacote_codigo' para integer em vez de serial
+ALTER TABLE public."Cliente_Pacote"
+ALTER COLUMN "Cliente_codigo" TYPE integer,
+ALTER COLUMN "Pacote_codigo" TYPE integer;
+
+ALTER TABLE public."Pacote_Visita"
+ALTER COLUMN "Pacote_codigo" TYPE integer,
+ALTER COLUMN "Visita_codigo" TYPE integer;
+
+-- Correção no nome da função de validação de CPF
+-- Não é necessária uma correção de código aqui, somente certifique-se de que a função chamada na trigger é a que você definiu anteriormente.
+-- Apenas certifique-se de que a chamada da função esteja correta em suas triggers.
+
+
+
 -- Adicionando suporte para imagem na tabela "Cidade"
 ALTER TABLE public."Cidade"
 ADD imagem bytea;
@@ -383,7 +405,7 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION VERIFICA_CPF() RETURNS TRIGGER AS
 $$
 BEGIN
-	IF(NOT VALIDACPF(NEW.cpf)) THEN
+	IF(NOT VALIDA_CPF(NEW.cpf)) THEN
 		RAISE EXCEPTION 'CPF inválido';
 	END IF;
 	RETURN NEW;
