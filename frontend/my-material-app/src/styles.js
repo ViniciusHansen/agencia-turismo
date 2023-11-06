@@ -26,8 +26,12 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
   },
   cardMedia: {
-    paddingTop: "56.25%", //16:9
+    paddingTop: "56.25%", // mantém a razão de aspecto 16:9
+    height: "200px",
+    width: "100%",
+    objectFit: "cover",
   },
+
   cardContent: {
     flexGrow: 1,
     // flex: 1,

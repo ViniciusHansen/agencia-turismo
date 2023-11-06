@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const PacoteForm = () => {
+const PacoteForm = ({goBack}) => {
   const [hoteis, setHoteis] = useState([{ categoria: "", imagem: null }]);
   const [restaurantes, setRestaurantes] = useState([
     { especialidade: "", imagem: null },
@@ -62,7 +62,7 @@ const PacoteForm = () => {
 
     // Cria um objeto FormData para enviar os dados do formulário
     const formData = new FormData();
-    formData.append("valor", pacote.valor);
+    formData.append("visita_nome", pacote.visita_nome);
     formData.append("data_ini", pacote.data_ini);
     formData.append("data_fim", pacote.data_fim);
 
@@ -81,7 +81,7 @@ const PacoteForm = () => {
 
     // Fetch ou Axios para enviar os dados do formulário para o servidor
     
-    fetch("/add-pacote", {
+    fetch("/add-visita", {
       method: "POST",
       body: formData,
     })
@@ -92,23 +92,23 @@ const PacoteForm = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Pacote</h3>
+      <h3>Visita</h3>
       <input
-        type="number"
-        name="valor"
-        value={pacote.valor}
+        type="text"
+        name="visita_nome"
+        value={pacote.nome}
         onChange={handlePacoteChange}
-        placeholder="Valor"
+        placeholder="Nome Visita"
       />
       <input
-        type="date"
+        type="time"
         name="data_ini"
         value={pacote.data_ini}
         onChange={handlePacoteChange}
         placeholder="Data Início"
       />
       <input
-        type="date"
+        type="time"
         name="data_fim"
         value={pacote.data_fim}
         onChange={handlePacoteChange}
@@ -237,6 +237,7 @@ const PacoteForm = () => {
       <br />
 
       <button type="submit">Adicionar Pacote</button>
+      <button onClick={goBack}>Voltar</button>
     </form>
   );
 };

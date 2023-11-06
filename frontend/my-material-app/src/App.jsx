@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import Autocomplete from "@mui/joy/Autocomplete";
 import useStyles from "./styles";
@@ -31,6 +31,22 @@ const App = () => {
   const [isLogged, setIsLogged] = useState(false);
   const [username, setUsername] = useState("");
   const [viewPacoteForm, setViewPacoteForm] = useState(false);
+  const [pacotes, setPacotes] = useState([]);
+
+  useEffect(() => {
+    // Função para carregar os pacotes.
+    const fetchPacotes = async () => {
+      try {
+        const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
+        const data = await response.json();
+        setPacotes(data); // Atualizando o estado com os dados recebidos.
+      } catch (error) {
+        console.error("Falha ao buscar pacotes:", error);
+      }
+    };
+
+    fetchPacotes(); // Chamada da função no carregamento do componente.
+  }, []); // Array de dependências vazio, indica que o efeito será executado uma vez após o render inicial.
 
   const handleLogout = () => {
     // Limpe qualquer armazenamento local ou token de sessão
@@ -156,44 +172,88 @@ const App = () => {
           </Container>
         </div>
         <Container className={classes.cardGrid} maxWidth="md">
-          <Grid container spacing={4}>
-            {cards.map((card) => (
-              <Grid item key={card} xs={12}>
-                <Card className={classes.card}>
-                  <Grid container>
-                    <Grid item xs={12} sm={6}>
-                      <CardMedia
-                        className={classes.cardMedia}
-                        image="https://source.unsplash.com/random"
-                        title="Image Title"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <CardContent className={classes.CardContent}>
-                        <Typography gutterBottom variant="h5">
-                          Heading
-                        </Typography>
-                        <Typography>
-                          Descrição do conteudo. escala junto com o tamanho do
-                          grid
-                        </Typography>
-                      </CardContent>
-                      <CardActions className={classes.buttonVerMais}>
-                        <Button
-                          size="small"
-                          color="primary"
-                          onClick={() => setViewDetails(true)}
-                        >
-                          Ver mais
-                        </Button>
-                      </CardActions>
-                    </Grid>
-                  </Grid>
-                </Card>
+    <Grid container spacing={4}>
+      {pacotes.map((pacote) => (
+        <Grid item key={pacote.codigo} xs={12} md={6}>
+          <Card className={classes.card}>
+            <Grid container spacing={2}>
+
+              <Grid item xs={12} sm={6}>
+                <CardMedia
+                  className={classes.cardMedia}
+                  image={
+                    pacote.imagem ||
+                    "https://demofree.sirv.com/nope-not-here.jpg"
+                  }
+                  title={pacote.nome}
+                />
               </Grid>
-            ))}
-          </Grid>
-        </Container>
+
+              <Grid item xs={12} sm={6}>
+                <CardContent className={classes.cardContent}>
+                  <Typography gutterBottom variant="h5">
+                    {pacote.nome}
+                  </Typography>
+                  <Typography>
+                    {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
+                  </Typography>
+                </CardContent>
+                <CardActions className={classes.buttonVerMais}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => setViewDetails(true)}
+                  >
+                    Ver mais
+                  </Button>
+                </CardActions>
+              </Grid>
+
+            </Grid>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  </Container>
+
+        {/* <Container className={classes.cardGrid} maxWidth="md">
+          <Grid container spacing={4}>
+            {pacotes.map((pacote) => (
+              <Grid item key={pacote.codigo} xs={12} sm={6} md={4}>
+                <Card className={classes.card}>
+                  <CardMedia
+                    className={classes.cardMedia}
+                    image={
+                      pacote.imagem ||
+                      "https://demofree.sirv.com/nope-not-here.jpg"
+                    }
+                    title={pacote.nome}
+                  />
+                  <Grid item xs={12} sm={6}>
+                    <CardContent className={classes.CardContent}>
+                      <Typography gutterBottom variant="h5">
+                        {pacote.nome}
+                      </Typography>
+                      <Typography>
+                        {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
+                      </Typography>
+                    </CardContent>
+                    <CardActions className={classes.buttonVerMais}>
+                      <Button
+                        size="small"
+                        color="primary"
+                        onClick={() => setViewDetails(true)}
+                      >
+                        Ver mais
+                      </Button>
+                    </CardActions>
+                  </Grid>
+                  {/* E assim por diante... */}
+                 {/* </Card>
+               </Grid>
+             ))}
+           </Grid>
+         </Container> */}
       </main>
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>

@@ -51,8 +51,8 @@ class Visita(db.Model):
     codigo = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String)
     endereco = db.Column(db.String)
-    datahora_ini = db.Column(db.DateTime)
-    datahora_fim = db.Column(db.DateTime)
+    hora_ini = db.Column(db.DateTime)
+    hora_fim = db.Column(db.DateTime)
     tipo_visita = db.Column(db.Integer, db.ForeignKey('Tipo Visita.codigo'))
     codigo_cidade = db.Column(db.Integer, db.ForeignKey('Cidade.codigo'))
 
@@ -251,128 +251,69 @@ def login():
         return jsonify({'access_token': access_token}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
-@app.route('/pacotes', methods=['GET'])
-def get_pacotes():
-    pacotes = Pacote.query.all()  # Obtém todos os pacotes
+@app.route('/visitas', methods=['GET'])
+def get_visitas():
+    visitas = Visita.query.all()  # Obtém todas as visitas
     resultado = []
 
-    for pacote in pacotes:
-        # Encontra todas as visitas associadas a esse pacote
-        visitas = (db.session.query(Visita, Pacote_Visita, Hotel, Restaurante, PontoTuristico)
-                   .outerjoin(Pacote_Visita, Pacote_Visita.visita_id == Visita.id)
-                   .outerjoin(Hotel, Hotel.codigo_visita == Visita.id)
-                   .outerjoin(Restaurante, Restaurante.codigo_visita == Visita.id)
-                   .outerjoin(PontoTuristico, PontoTuristico.codigo_visita == Visita.id)
-                   .filter(Pacote_Visita.pacote_id == pacote.id)
-                   .all())
-
-        # Estrutura de dados para acumular informações
-        detalhes_pacote = {
-            'codigo': pacote.codigo,
-            'nome': pacote.nome,
-            'descricao': pacote.descricao,
-            'valor': pacote.valor,
-            'data_ini': pacote.data_ini,
-            'data_fim': pacote.data_fim,
+    for visita in visitas:
+        # Estrutura de dados para acumular informações da visita
+        detalhes_visita = {
+            'codigo': visita.codigo,
+            'nome': visita.nome,
+            'endereco': visita.endereco,
+            'hora_ini': str(visita.hora_ini),
+            'hora_fim': str(visita.hora_fim),
+            'tipo_visita': visita.tipo_visita,
             'hoteis': [],
             'restaurantes': [],
             'pontos_turisticos': []
         }
 
-        # Itera sobre as visitas e preenche os detalhes relacionados
-        for visita_completa in visitas:
-            visita, pacote_visita, hotel, restaurante, ponto_turistico = visita_completa
+        # Encontra todas as informações associadas a essa visita
+        hoteis = Hotel.query.filter_by(codigo_visita=visita.codigo).all()
+        restaurantes = Restaurante.query.filter_by(codigo_visita=visita.codigo).all()
+        pontos_turisticos = PontoTuristico.query.filter_by(codigo_visita=visita.codigo).all()
 
-            if hotel:
-                detalhes_pacote['hoteis'].append({
-                    'nome': hotel.nome,
-                    'categoria': hotel.categoria,
-                    'imagem' : hotel.imagem
-                })
+        for hotel in hoteis:
+            detalhes_visita['hoteis'].append({
+                'nome': hotel.nome,
+                'categoria': hotel.categoria,
+                'imagem': hotel.imagem  # assumindo que temos um campo nome no modelo de Hotel, que é incorreto com base na estrutura atual, por favor adicione se necessário
+            })
 
-            if restaurante:
-                detalhes_pacote['restaurantes'].append({
-                    'nome' : restaurante.nome, 
-                    'preco_medio': restaurante.preco_medio,
-                    'especialidade': restaurante.especialidade,
-                    'categoria' : restaurante.categoria,
-                    'imagem' : restaurante.imagem
-                })
+        for restaurante in restaurantes:
+            detalhes_visita['restaurantes'].append({
+                'nome': restaurante.nome,
+                'preco_medio': restaurante.preco_medio,
+                'especialidade': restaurante.especialidade,
+                'categoria': restaurante.categoria,
+                'imagem': restaurante.imagem
+            })
 
-            if ponto_turistico:
-                detalhes_pacote['pontos_turisticos'].append({
-                    'nome': ponto_turistico.nome,
-                    'descricao': ponto_turistico.descricao,
-                    'imagem' : ponto_turistico.imagem
-                })
+        for ponto_turistico in pontos_turisticos:
+            detalhes_visita['pontos_turisticos'].append({
+                'nome': ponto_turistico.nome,
+                'descricao': ponto_turistico.desc,
+                'imagem': ponto_turistico.imagem
+            })
 
-        resultado.append(detalhes_pacote)
+        resultado.append(detalhes_visita)
 
     return jsonify(resultado), 200
 
-@app.route('/pacotes/<int:codigo>', methods=['GET'])
-def get_pacote(codigo):
-    pacote = Pacote.query.get(codigo)
-    if not pacote:
-        return jsonify({'message': 'Pacote not found'}), 404
-
-    visitas = (db.session.query(Visita, Pacote_Visita, Hotel, Restaurante, PontoTuristico)
-               .outerjoin(Pacote_Visita, Pacote_Visita.visita_id == Visita.id)
-               .outerjoin(Hotel, Hotel.codigo_visita == Visita.id)
-               .outerjoin(Restaurante, Restaurante.codigo_visita == Visita.id)
-               .outerjoin(PontoTuristico, PontoTuristico.codigo_visita == Visita.id)
-               .filter(Pacote_Visita.pacote_id == pacote.id)
-               .all())
-
-    detalhes_pacote = {
-        'codigo': pacote.codigo,
-        'nome': pacote.nome,
-        'descricao': pacote.descricao,
-        'valor': pacote.valor,
-        'data_ini': pacote.data_ini,
-        'data_fim': pacote.data_fim,
-        'hoteis': [],
-        'restaurantes': [],
-        'pontos_turisticos': []
-    }
-
-    for visita_completa in visitas:
-        visita, pacote_visita, hotel, restaurante, ponto_turistico = visita_completa
-
-        if hotel:
-            detalhes_pacote['hoteis'].append({
-                'nome': hotel.nome,
-                'categoria': hotel.categoria,
-                'imagem' : hotel.imagem
-            })
-
-        if restaurante:
-            detalhes_pacote['restaurantes'].append({
-                'nome' : restaurante.nome, 
-                'preco_medio': restaurante.preco_medio,
-                'especialidade': restaurante.especialidade,
-                'categoria' : restaurante.categoria,
-                'imagem' : restaurante.imagem
-            })
-
-        if ponto_turistico:
-            detalhes_pacote['pontos_turisticos'].append({
-                'nome': ponto_turistico.nome,
-                'descricao': ponto_turistico.descricao,
-                'imagem' : ponto_turistico.imagem
-            })
-
-    return jsonify(detalhes_pacote), 200
 
 
-@app.route('/add-pacote', methods=['POST'])
+
+@app.route('/add-visita', methods=['POST'])
 def add_pacote():
     form_data = request.form.to_dict()
     print("Form Data:", form_data)
-    # Lê os dados básicos do pacote
-    valor = request.form['valor']
+    # Lê os dados básicos da visita
+    visita_nome = request.form['visita_nome']
     data_ini = request.form['data_ini']
     data_fim = request.form['data_fim']
+    
     cidade_nome = request.form['cidade_nome']
     cidade_estado = request.form['cidade_estado']
     cidade_populacao = request.form['cidade_populacao']
@@ -382,9 +323,9 @@ def add_pacote():
     cidade_imagem_blob = cidade_imagem.read() if cidade_imagem else None  # Ou converta para Base64 se o banco exigir
 
     # Salva o pacote (a lógica para associar hotéis, restaurantes e pontos turísticos ao pacote pode variar)
-    pacote = Pacote(valor=valor, data_ini=data_ini, data_fim=data_fim)
+    visita = Visita(nome=visita_nome, hora_ini=data_ini, hora_fim=data_fim)
     cidade = Cidade(nome=cidade_nome,estado=cidade_estado,populacao=cidade_populacao,imagem=cidade_imagem_blob)
-    db.session.add(pacote)
+    db.session.add(visita)
     db.session.add(cidade)
 
     hoteis_data = json.loads(request.form['hoteis'])
