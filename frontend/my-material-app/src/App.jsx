@@ -65,7 +65,7 @@ const App = () => {
   }
 
   if (viewDetails) {
-    return <Detalhes goBack={() => setViewDetails(false)} />;
+      return <Detalhes pacote={viewDetails} goBack={() => setViewDetails(null)} />;
   }
 
   if (viewSignInSide) {
@@ -146,7 +146,7 @@ const App = () => {
               color="textPrimary"
               gutterBottom
             >
-              Pacotes em Destaque
+              Visitas em Destaque
             </Typography>
             <Typography
               variant="h5"
@@ -202,7 +202,7 @@ const App = () => {
                   <Button
                     size="small"
                     color="primary"
-                    onClick={() => setViewDetails(true)}
+                    onClick={() => setViewDetails(pacote)}
                   >
                     Ver mais
                   </Button>

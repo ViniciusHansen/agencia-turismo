@@ -17,7 +17,7 @@ import {
 
 const cards = [1, 2, 3, 4];
 
-const Detalhes = ({ goBack }) => {
+const Detalhes = ({ goBack, pacote }) => {
   const classes = useStyles();
 
   return (
@@ -37,7 +37,7 @@ const Detalhes = ({ goBack }) => {
               color="textPrimary"
               gutterBottom
             >
-              Nome do Pacote
+              {pacote.nome}
             </Typography>
             <Typography
               variant="h5"
@@ -45,7 +45,7 @@ const Detalhes = ({ goBack }) => {
               color="textSecondary"
               paragraph
             >
-              Descrição do Pacote
+              {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
             </Typography>
           </Container>
         </div>
@@ -92,7 +92,6 @@ const Detalhes = ({ goBack }) => {
             </Grid>
           </Grid>
         </div>
-
       </main>
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>

@@ -38,6 +38,7 @@ class Cidade(db.Model):
     estado = db.Column(db.String)
     populacao = db.Column(db.Integer)
     imagem = db.Column(db.LargeBinary)
+    visita = db.relationship('Visita', backref='cidade', lazy=True)
 
 
 class TipoVisita(db.Model):
@@ -59,6 +60,7 @@ class Visita(db.Model):
 
 class Hotel(db.Model):
     __tablename__ = 'Hotel'
+    nome = db.Column(db.String)
     codigo = db.Column(db.Integer, primary_key=True)
     categoria = db.Column(db.String)
     codigo_visita = db.Column(db.Integer, db.ForeignKey(
@@ -77,6 +79,7 @@ class Restaurante(db.Model):
         db.Integer, db.ForeignKey('Hotel.codigo_visita'))
     casa_de_show_associada = db.Column(db.Integer)
     imagem = db.Column(db.LargeBinary)
+    nome = db.Column(db.String)
 
 
 class Quarto(db.Model):
@@ -94,7 +97,7 @@ class PontoTuristico(db.Model):
     desc = db.Column(db.String)
     codigo_visita = db.Column(db.Integer, db.ForeignKey('Visita.codigo'))
     imagem = db.Column(db.LargeBinary)
-
+    nome = db.Column(db.String)
 
 class CasaDeShow(db.Model):
     __tablename__ = 'Casa de Show'
@@ -278,7 +281,7 @@ def get_visitas():
         for hotel in hoteis:
             detalhes_visita['hoteis'].append({
                 'nome': hotel.nome,
-                'categoria': hotel.categoria,
+                # 'categoria': hotel.categoria,
                 'imagem': hotel.imagem  # assumindo que temos um campo nome no modelo de Hotel, que é incorreto com base na estrutura atual, por favor adicione se necessário
             })
 
@@ -323,49 +326,43 @@ def add_pacote():
     cidade_imagem_blob = cidade_imagem.read() if cidade_imagem else None  # Ou converta para Base64 se o banco exigir
 
     # Salva o pacote (a lógica para associar hotéis, restaurantes e pontos turísticos ao pacote pode variar)
-    visita = Visita(nome=visita_nome, hora_ini=data_ini, hora_fim=data_fim)
     cidade = Cidade(nome=cidade_nome,estado=cidade_estado,populacao=cidade_populacao,imagem=cidade_imagem_blob)
-    db.session.add(visita)
     db.session.add(cidade)
+    db.session.commit()
+    visita = Visita(nome=visita_nome, hora_ini=data_ini, hora_fim=data_fim, codigo_cidade=cidade.codigo)
+    db.session.add(visita)
+    db.session.commit()
 
     hoteis_data = json.loads(request.form['hoteis'])
     restaurantes_data = json.loads(request.form['restaurantes'])
     pontos_turisticos_data = json.loads(request.form['pontosTuristicos'])
 
-    # Processar e salvar hotéis
     for index, hotel_dado in enumerate(hoteis_data):
         categoria = hotel_dado['categoria']
-        # Obter imagem associada ao hotel pelo índice
         hotel_imagem = request.files.get(f'hotel_{index}_imagem')        
         hotel_imagem_blob = hotel_imagem.read() if hotel_imagem else None
-        # Criar e salvar o objeto Hotel
-        hotel = Hotel(categoria=categoria, imagem=hotel_imagem_blob)
+        hotel = Hotel(categoria=categoria, imagem=hotel_imagem_blob, codigo_visita=visita.codigo)
         db.session.add(hotel)
 
-    # Processar e salvar restaurantes
     for index, restaurante_dado in enumerate(restaurantes_data):
         especialidade = restaurante_dado['especialidade']
-        # Obter imagem associada ao restaurante pelo índice
         restaurante_imagem = request.files.get(f'restaurante_{index}_imagem')
         restaurante_imagem_blob = restaurante_imagem.read() if restaurante_imagem else None
-        # Criar e salvar o objeto Restaurante
-        restaurante = Restaurante(especialidade=especialidade, imagem=restaurante_imagem_blob)
+        restaurante = Restaurante(especialidade=especialidade, imagem=restaurante_imagem_blob, codigo_visita=visita.codigo)
         db.session.add(restaurante)
 
-    # Processar e salvar pontos turísticos
     for index, ponto_turistico_dado in enumerate(pontos_turisticos_data):
         descricao = ponto_turistico_dado['desc']
-        # Obter imagem associada ao ponto turístico pelo índice
         ponto_imagem = request.files.get(f'pontoTuristico_{index}_imagem')
         ponto_imagem_blob = ponto_imagem.read() if ponto_imagem else None
-        # Criar e salvar o objeto PontoTuristico
-        ponto_turistico = PontoTuristico(desc=descricao, imagem=ponto_imagem_blob)
+        ponto_turistico = PontoTuristico(desc=descricao, imagem=ponto_imagem_blob, codigo_visita=visita.codigo)
         db.session.add(ponto_turistico)
 
 
     db.session.commit()  # Salva todas as alterações no banco de dados
 
     return jsonify({'message': 'Pacote adicionado com sucesso'}), 201
+
 
 
 @app.route('/pacotes/reservar', methods=['POST'])

@@ -36,12 +36,14 @@ CREATE TABLE IF NOT EXISTS public."Cidade"
 CREATE TABLE IF NOT EXISTS public."Hotel"
 (
     categoria character varying(63),
-    codigo_visita integer unique
+    codigo_visita integer unique,
+    nome character varying(63)
 );
 
 CREATE TABLE IF NOT EXISTS public."Restaurante"
 (
     codigo serial NOT NULL,
+    nome character varying(63),
     especialidade character varying(63),
     preco_medio double precision,
     categoria character varying(63),
@@ -65,7 +67,8 @@ CREATE TABLE IF NOT EXISTS public."Casa de Show"
     hora_ini time without time zone,
     hora_fim time without time zone,
     dia_fecha character varying(15),
-    codigo_pontoturistico integer unique
+    codigo_pontoturistico integer unique,
+    nome character varying(63)
 );
 
 CREATE TABLE IF NOT EXISTS public."Ponto Turistico"
@@ -73,7 +76,8 @@ CREATE TABLE IF NOT EXISTS public."Ponto Turistico"
     codigo serial NOT NULL,
     "desc" character varying(63),
     codigo_visita integer unique,
-    PRIMARY KEY (codigo)
+    PRIMARY KEY (codigo),
+    nome character varying(63)
 );
 
 CREATE TABLE IF NOT EXISTS public."Museu"
