@@ -5,7 +5,7 @@ import useStyles from "./styles";
 import Detalhes from "./Detalhes";
 import LoginPage from "./LoginDIY";
 import Register from "./RegisterDIY";
-import PacoteForm from "./PacoteForm";
+import PacoteForm from "./VisitaInput";
 
 import {
   Typography,
@@ -19,6 +19,7 @@ import {
   Toolbar,
   Container,
 } from "@mui/material";
+import VisitaInput from "./VisitaInput";
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const destinos = ["Joinville", "Florianópolis"];
@@ -39,6 +40,7 @@ const App = () => {
       try {
         const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
         const data = await response.json();
+        console.log(data)
         setPacotes(data); // Atualizando o estado com os dados recebidos.
       } catch (error) {
         console.error("Falha ao buscar pacotes:", error);
@@ -61,7 +63,7 @@ const App = () => {
   };
 
   if (viewPacoteForm) {
-    return <PacoteForm goBack={() => setViewPacoteForm(false)} />;
+    return <VisitaInput goBack={() => setViewPacoteForm(null)} />;
   }
 
   if (viewDetails) {
@@ -154,7 +156,7 @@ const App = () => {
               color="textSecondary"
               paragraph
             >
-              Esses são os pacotes disponíveis para reserva.
+              Essas são as visitas disponíveis para reserva. Adicione as visitas desejadas no carrinho. O pacote será fechado na hora da compra.
             </Typography>
             <div className={classes.button}>
               <Grid container spacing={2} justifyContent="center">
@@ -216,44 +218,6 @@ const App = () => {
     </Grid>
   </Container>
 
-        {/* <Container className={classes.cardGrid} maxWidth="md">
-          <Grid container spacing={4}>
-            {pacotes.map((pacote) => (
-              <Grid item key={pacote.codigo} xs={12} sm={6} md={4}>
-                <Card className={classes.card}>
-                  <CardMedia
-                    className={classes.cardMedia}
-                    image={
-                      pacote.imagem ||
-                      "https://demofree.sirv.com/nope-not-here.jpg"
-                    }
-                    title={pacote.nome}
-                  />
-                  <Grid item xs={12} sm={6}>
-                    <CardContent className={classes.CardContent}>
-                      <Typography gutterBottom variant="h5">
-                        {pacote.nome}
-                      </Typography>
-                      <Typography>
-                        {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
-                      </Typography>
-                    </CardContent>
-                    <CardActions className={classes.buttonVerMais}>
-                      <Button
-                        size="small"
-                        color="primary"
-                        onClick={() => setViewDetails(true)}
-                      >
-                        Ver mais
-                      </Button>
-                    </CardActions>
-                  </Grid>
-                  {/* E assim por diante... */}
-                 {/* </Card>
-               </Grid>
-             ))}
-           </Grid>
-         </Container> */}
       </main>
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>

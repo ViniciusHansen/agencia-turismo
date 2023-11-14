@@ -63,6 +63,7 @@ class Hotel(db.Model):
     nome = db.Column(db.String)
     codigo = db.Column(db.Integer, primary_key=True)
     categoria = db.Column(db.String)
+    descricao = db.Column(db.String)
     codigo_visita = db.Column(db.Integer, db.ForeignKey(
         'Visita.codigo'))
     imagem = db.Column(db.LargeBinary)
@@ -80,6 +81,7 @@ class Restaurante(db.Model):
     casa_de_show_associada = db.Column(db.Integer)
     imagem = db.Column(db.LargeBinary)
     nome = db.Column(db.String)
+    descricao = db.Column(db.String)
 
 
 class Quarto(db.Model):
@@ -94,10 +96,10 @@ class Quarto(db.Model):
 class PontoTuristico(db.Model):
     __tablename__ = 'Ponto Turistico'
     codigo = db.Column(db.Integer, primary_key=True)
-    desc = db.Column(db.String)
     codigo_visita = db.Column(db.Integer, db.ForeignKey('Visita.codigo'))
     imagem = db.Column(db.LargeBinary)
     nome = db.Column(db.String)
+    descricao = db.Column(db.String)
 
 class CasaDeShow(db.Model):
     __tablename__ = 'Casa de Show'
@@ -256,11 +258,20 @@ def login():
 
 @app.route('/visitas', methods=['GET'])
 def get_visitas():
-    visitas = Visita.query.all()  # Obtém todas as visitas
+    # visitas = Visita.query.all()  # Obtém todas as visitas
+    visitas = Visita.query.options(db.joinedload(Visita.cidade)).all()
     resultado = []
 
     for visita in visitas:
         # Estrutura de dados para acumular informações da visita
+        cidade_info = {
+            'codigo': visita.cidade.codigo,
+            'nome': visita.cidade.nome,
+            'estado': visita.cidade.estado,
+            'populacao': visita.cidade.populacao,
+            # Converte a imagem para uma string base64, se houver imagem.
+            'imagem': base64.b64encode(visita.cidade.imagem).decode('utf-8') if visita.cidade.imagem else None
+        }
         detalhes_visita = {
             'codigo': visita.codigo,
             'nome': visita.nome,
@@ -268,6 +279,7 @@ def get_visitas():
             'hora_ini': str(visita.hora_ini),
             'hora_fim': str(visita.hora_fim),
             'tipo_visita': visita.tipo_visita,
+            'cidade': cidade_info,
             'hoteis': [],
             'restaurantes': [],
             'pontos_turisticos': []
@@ -297,7 +309,7 @@ def get_visitas():
         for ponto_turistico in pontos_turisticos:
             detalhes_visita['pontos_turisticos'].append({
                 'nome': ponto_turistico.nome,
-                'descricao': ponto_turistico.desc,
+                'descricao': ponto_turistico.descricao,
                 'imagem': ponto_turistico.imagem
             })
 
@@ -352,17 +364,16 @@ def add_pacote():
         db.session.add(restaurante)
 
     for index, ponto_turistico_dado in enumerate(pontos_turisticos_data):
-        descricao = ponto_turistico_dado['desc']
+        descricao = ponto_turistico_dado['descricao']
         ponto_imagem = request.files.get(f'pontoTuristico_{index}_imagem')
         ponto_imagem_blob = ponto_imagem.read() if ponto_imagem else None
-        ponto_turistico = PontoTuristico(desc=descricao, imagem=ponto_imagem_blob, codigo_visita=visita.codigo)
+        ponto_turistico = PontoTuristico(descricao=descricao, imagem=ponto_imagem_blob, codigo_visita=visita.codigo)
         db.session.add(ponto_turistico)
 
 
     db.session.commit()  # Salva todas as alterações no banco de dados
 
     return jsonify({'message': 'Pacote adicionado com sucesso'}), 201
-
 
 
 @app.route('/pacotes/reservar', methods=['POST'])
@@ -395,6 +406,26 @@ def cancel_reserva():
     Cliente_Pacote.query.filter_by(Cliente_codigo=cliente.codigo, Pacote_codigo=data['pacote_codigo']).delete()
     db.session.commit()
     return jsonify({'message': 'Reservation cancelled successfully'}), 200
+
+@app.route('/hoteis', methods=['GET'])
+def get_hoteis():
+    hoteis = Hotel.query.all()
+    return jsonify([{'nome': hotel.nome, 'categoria': hotel.categoria, 'descricao': hotel.descricao} for hotel in hoteis]), 200
+
+@app.route('/restaurantes', methods=['GET'])
+def get_restaurantes():
+    restaurantes = Restaurante.query.all()
+    return jsonify([{'nome': restaurante.nome, 'especialidade': restaurante.especialidade, 'preco_medio': restaurante.preco_medio} for restaurante in restaurantes]), 200
+
+@app.route('/pontos-turisticos', methods=['GET'])
+def get_pontos_turisticos():
+    pontos_turisticos = PontoTuristico.query.all()
+    return jsonify([{'nome': ponto_turistico.nome, 'descricao': ponto_turistico.descricao} for ponto_turistico in pontos_turisticos]), 200
+
+@app.route('/cidades', methods=['GET'])
+def get_cidades():
+    cidades = Cidade.query.all()
+    return jsonify([{'nome': cidade.nome, 'estado': cidade.estado, 'populacao': cidade.populacao} for cidade in cidades]), 200
 
 
 if __name__ == "__main__":

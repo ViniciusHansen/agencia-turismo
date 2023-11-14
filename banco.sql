@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS public."Cidade"
 (
     codigo serial NOT NULL,
     nome character varying(63),
+    descricao character varying (300),
     estado character varying(63),
     populacao integer,
     PRIMARY KEY (codigo)
@@ -37,7 +38,8 @@ CREATE TABLE IF NOT EXISTS public."Hotel"
 (
     categoria character varying(63),
     codigo_visita integer unique,
-    nome character varying(63)
+    nome character varying(63),
+    descricao character varying(300)
 );
 
 CREATE TABLE IF NOT EXISTS public."Restaurante"
@@ -49,7 +51,8 @@ CREATE TABLE IF NOT EXISTS public."Restaurante"
     categoria character varying(63),
     codigo_visita integer unique,
     hotel_associado integer,
-    casa_de_show_associada integer
+    casa_de_show_associada integer,
+    descricao character varying(300)
 );
 
 CREATE TABLE IF NOT EXISTS public."Quarto"
@@ -74,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public."Casa de Show"
 CREATE TABLE IF NOT EXISTS public."Ponto Turistico"
 (
     codigo serial NOT NULL,
-    "desc" character varying(63),
+    descricao character varying(300),
     codigo_visita integer unique,
     PRIMARY KEY (codigo),
     nome character varying(63)
