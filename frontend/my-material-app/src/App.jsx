@@ -5,8 +5,11 @@ import useStyles from "./styles";
 import Detalhes from "./Detalhes";
 import LoginPage from "./LoginDIY";
 import Register from "./RegisterDIY";
-import PacoteForm from "./VisitaInput";
-
+import VisitaInput from "./VisitaInput";
+import CidadeCadastro from "./CidadeCadastro";
+import HotelCadastro from "./HotelCadastro";
+import PontoTuristicoCadastro from "./PontoTuristicoCadastro";
+import RestauranteCadastro from "./RestauranteCadastro";
 import {
   Typography,
   AppBar,
@@ -19,9 +22,7 @@ import {
   Toolbar,
   Container,
 } from "@mui/material";
-import VisitaInput from "./VisitaInput";
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const destinos = ["Joinville", "Florianópolis"];
 
 const App = () => {
@@ -32,6 +33,11 @@ const App = () => {
   const [isLogged, setIsLogged] = useState(false);
   const [username, setUsername] = useState("");
   const [viewPacoteForm, setViewPacoteForm] = useState(false);
+  const [viewCadastroCidade, setViewCadastroCidade] = useState(false);
+  const [viewCadastroRestaurante, setViewCadastroRestaurante] = useState(false);
+  const [viewCadastroPontoTuristico, setViewCadastroPontoTuristico] =
+    useState(false);
+  const [viewCadastroHotel, setViewCadastroHotel] = useState(false);
   const [pacotes, setPacotes] = useState([]);
 
   useEffect(() => {
@@ -40,7 +46,7 @@ const App = () => {
       try {
         const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         setPacotes(data); // Atualizando o estado com os dados recebidos.
       } catch (error) {
         console.error("Falha ao buscar pacotes:", error);
@@ -51,10 +57,8 @@ const App = () => {
   }, []); // Array de dependências vazio, indica que o efeito será executado uma vez após o render inicial.
 
   const handleLogout = () => {
-    // Limpe qualquer armazenamento local ou token de sessão
     localStorage.removeItem("access_token");
 
-    // Atualize o estado para refletir que o usuário não está mais logado
     setIsLogged(false);
     setUsername("");
 
@@ -66,10 +70,33 @@ const App = () => {
     return <VisitaInput goBack={() => setViewPacoteForm(null)} />;
   }
 
-  if (viewDetails) {
-      return <Detalhes pacote={viewDetails} goBack={() => setViewDetails(null)} />;
+  if (viewCadastroCidade) {
+    return <CidadeCadastro goBack={() => setViewCadastroCidade(null)} />;
   }
 
+  if (viewCadastroPontoTuristico) {
+    return (
+      <PontoTuristicoCadastro
+        goBack={() => setViewCadastroPontoTuristico(null)}
+      />
+    );
+  }
+
+  if (viewCadastroRestaurante) {
+    return (
+      <RestauranteCadastro goBack={() => setViewCadastroRestaurante(null)} />
+    );
+  }
+
+  if (viewCadastroHotel) {
+    return <HotelCadastro goBack={() => setViewCadastroHotel(null)} />;
+  }
+
+  if (viewDetails) {
+    return (
+      <Detalhes pacote={viewDetails} goBack={() => setViewDetails(null)} />
+    );
+  }
   if (viewSignInSide) {
     return (
       <LoginPage
@@ -109,12 +136,42 @@ const App = () => {
               <Button color="inherit" variant="outlined" onClick={handleLogout}>
                 Logout
               </Button>
+
               <Button
                 color="inherit"
                 variant="outlined"
                 onClick={setViewPacoteForm}
               >
-                Admin Panel
+                Cadastrar Visitas
+              </Button>
+
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewCadastroHotel}
+              >
+                Cadastrar Hotel
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewCadastroRestaurante}
+              >
+                Cadastrar Restaurante
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewCadastroCidade}
+              >
+                Cadastrar Cidade
+              </Button>
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewCadastroPontoTuristico}
+              >
+                Cadastrar Ponto Turístico
               </Button>
             </>
           ) : (
@@ -156,7 +213,8 @@ const App = () => {
               color="textSecondary"
               paragraph
             >
-              Essas são as visitas disponíveis para reserva. Adicione as visitas desejadas no carrinho. O pacote será fechado na hora da compra.
+              Essas são as visitas disponíveis para reserva. Adicione as visitas
+              desejadas no carrinho. O pacote será fechado na hora da compra.
             </Typography>
             <div className={classes.button}>
               <Grid container spacing={2} justifyContent="center">
@@ -174,50 +232,47 @@ const App = () => {
           </Container>
         </div>
         <Container className={classes.cardGrid} maxWidth="md">
-    <Grid container spacing={4}>
-      {pacotes.map((pacote) => (
-        <Grid item key={pacote.codigo} xs={12} md={6}>
-          <Card className={classes.card}>
-            <Grid container spacing={2}>
+          <Grid container spacing={4}>
+            {pacotes.map((pacote) => (
+              <Grid item key={pacote.codigo} xs={12} md={6}>
+                <Card className={classes.card}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <CardMedia
+                        className={classes.cardMedia}
+                        image={
+                          pacote.imagem ||
+                          "https://demofree.sirv.com/nope-not-here.jpg"
+                        }
+                        title={pacote.nome}
+                      />
+                    </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <CardMedia
-                  className={classes.cardMedia}
-                  image={
-                    pacote.imagem ||
-                    "https://demofree.sirv.com/nope-not-here.jpg"
-                  }
-                  title={pacote.nome}
-                />
+                    <Grid item xs={12} sm={6}>
+                      <CardContent className={classes.cardContent}>
+                        <Typography gutterBottom variant="h5">
+                          {pacote.nome}
+                        </Typography>
+                        <Typography>
+                          {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
+                        </Typography>
+                      </CardContent>
+                      <CardActions className={classes.buttonVerMais}>
+                        <Button
+                          size="small"
+                          color="primary"
+                          onClick={() => setViewDetails(pacote)}
+                        >
+                          Ver mais
+                        </Button>
+                      </CardActions>
+                    </Grid>
+                  </Grid>
+                </Card>
               </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <CardContent className={classes.cardContent}>
-                  <Typography gutterBottom variant="h5">
-                    {pacote.nome}
-                  </Typography>
-                  <Typography>
-                    {`Das ${pacote.hora_ini} às ${pacote.hora_fim}`}
-                  </Typography>
-                </CardContent>
-                <CardActions className={classes.buttonVerMais}>
-                  <Button
-                    size="small"
-                    color="primary"
-                    onClick={() => setViewDetails(pacote)}
-                  >
-                    Ver mais
-                  </Button>
-                </CardActions>
-              </Grid>
-
-            </Grid>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
-  </Container>
-
+            ))}
+          </Grid>
+        </Container>
       </main>
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>

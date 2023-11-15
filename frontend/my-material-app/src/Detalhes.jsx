@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 
 const Detalhes = ({ goBack, pacote }) => {
+
+  console.log(pacote)
   const classes = useStyles();
   let pontoInteresseImagem, pontoInteresseTitulo, pontoInteresseSubtitulo;
 
@@ -74,7 +76,7 @@ const Detalhes = ({ goBack, pacote }) => {
                 <CardMedia
                   className={classes.cardMedia}
                   image={
-                    pacote.cidade.imagem ||
+                    // pacote.cidade.imagem ||
                     "https://demofree.sirv.com/nope-not-here.jpg"
                   }
                   title={pacote.cidade.nome}

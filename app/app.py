@@ -56,6 +56,10 @@ class Visita(db.Model):
     hora_fim = db.Column(db.DateTime)
     tipo_visita = db.Column(db.Integer, db.ForeignKey('Tipo Visita.codigo'))
     codigo_cidade = db.Column(db.Integer, db.ForeignKey('Cidade.codigo'))
+    # categoria = db.Column(db.String)
+    # descricao = db.Column(db.String)
+    # preco_medio = db.Column(db.Float)
+    
 
 
 class Hotel(db.Model):
@@ -240,12 +244,6 @@ def register():
         return jsonify({'message': 'registered successfully'}), 200
     return render_template('signup.html')
 
-@app.errorhandler(404)
-def invalid_route(e):
-    # You can use the exception object e to get more information about the error if needed
-    return 'This route is invalid or the page does not exist.', 404
-
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -317,63 +315,63 @@ def get_visitas():
 
     return jsonify(resultado), 200
 
-
-
-
 @app.route('/add-visita', methods=['POST'])
-def add_pacote():
-    form_data = request.form.to_dict()
-    print("Form Data:", form_data)
-    # Lê os dados básicos da visita
-    visita_nome = request.form['visita_nome']
-    data_ini = request.form['data_ini']
-    data_fim = request.form['data_fim']
+def add_visita():
+    # Obtenha os dados JSON enviados no corpo da solicitação
+    json_data = request.get_json()
+
+    # Lê os dados do JSON
+    visita_nome = json_data['nome']
+    endereco = json_data['endereco']
+    hora_ini = json_data['hora_ini']
+    hora_fim = json_data['hora_fim']
+
+    # Processa os campos selecionados
+    cidade_nome = json_data.get('cidade', {}).get('value')
+    cidade = Cidade.query.filter_by(nome=cidade_nome).first()
     
-    cidade_nome = request.form['cidade_nome']
-    cidade_estado = request.form['cidade_estado']
-    cidade_populacao = request.form['cidade_populacao']
-    
-    # Processa a imagem da cidade como um BLOB
-    cidade_imagem = request.files.get('cidade_imagem')
-    cidade_imagem_blob = cidade_imagem.read() if cidade_imagem else None  # Ou converta para Base64 se o banco exigir
+    restaurante = None
+    pontoTuristico = None
+    hotel = None
 
-    # Salva o pacote (a lógica para associar hotéis, restaurantes e pontos turísticos ao pacote pode variar)
-    cidade = Cidade(nome=cidade_nome,estado=cidade_estado,populacao=cidade_populacao,imagem=cidade_imagem_blob)
-    db.session.add(cidade)
+    if json_data.get('restaurante', {}) != None:
+        restaurante_nome = json_data.get('restaurante', {}).get('value')
+        restaurante = Restaurante.query.filter_by(nome=restaurante_nome).first()
+
+    if json_data.get('pontoTuristico', {}) != None:
+        pontoTuristico_nome = json_data.get('pontoTuristico', {}).get('value')
+        pontoTuristico = PontoTuristico.query.filter_by(nome=pontoTuristico_nome).first()
+
+    if json_data.get('hotel', {}) != None:
+        hotel_nome = json_data.get('hotel', {}).get('value')
+        hotel = Hotel.query.filter_by(nome=hotel_nome).first()
+
+    # Crie a visita no banco de dados
+    nova_visita = Visita(
+        nome=visita_nome,
+        endereco=endereco,
+        hora_ini=hora_ini,
+        hora_fim=hora_fim,
+        cidade=cidade
+    )
+
+    db.session.add(nova_visita)
     db.session.commit()
-    visita = Visita(nome=visita_nome, hora_ini=data_ini, hora_fim=data_fim, codigo_cidade=cidade.codigo)
-    db.session.add(visita)
-    db.session.commit()
 
-    hoteis_data = json.loads(request.form['hoteis'])
-    restaurantes_data = json.loads(request.form['restaurantes'])
-    pontos_turisticos_data = json.loads(request.form['pontosTuristicos'])
+    # Adicione o código da visita ao hotel, restaurante ou ponto turístico
+    if restaurante:
+        restaurante.codigo_visita = nova_visita.codigo
+        db.session.commit()
 
-    for index, hotel_dado in enumerate(hoteis_data):
-        categoria = hotel_dado['categoria']
-        hotel_imagem = request.files.get(f'hotel_{index}_imagem')        
-        hotel_imagem_blob = hotel_imagem.read() if hotel_imagem else None
-        hotel = Hotel(categoria=categoria, imagem=hotel_imagem_blob, codigo_visita=visita.codigo)
-        db.session.add(hotel)
+    if pontoTuristico:
+        pontoTuristico.codigo_visita = nova_visita.codigo
+        db.session.commit()
 
-    for index, restaurante_dado in enumerate(restaurantes_data):
-        especialidade = restaurante_dado['especialidade']
-        restaurante_imagem = request.files.get(f'restaurante_{index}_imagem')
-        restaurante_imagem_blob = restaurante_imagem.read() if restaurante_imagem else None
-        restaurante = Restaurante(especialidade=especialidade, imagem=restaurante_imagem_blob, codigo_visita=visita.codigo)
-        db.session.add(restaurante)
+    if hotel:
+        hotel.codigo_visita = nova_visita.codigo
+        db.session.commit()
 
-    for index, ponto_turistico_dado in enumerate(pontos_turisticos_data):
-        descricao = ponto_turistico_dado['descricao']
-        ponto_imagem = request.files.get(f'pontoTuristico_{index}_imagem')
-        ponto_imagem_blob = ponto_imagem.read() if ponto_imagem else None
-        ponto_turistico = PontoTuristico(descricao=descricao, imagem=ponto_imagem_blob, codigo_visita=visita.codigo)
-        db.session.add(ponto_turistico)
-
-
-    db.session.commit()  # Salva todas as alterações no banco de dados
-
-    return jsonify({'message': 'Pacote adicionado com sucesso'}), 201
+    return jsonify({'message': 'Visita cadastrada com sucesso'}), 201
 
 
 @app.route('/pacotes/reservar', methods=['POST'])
@@ -426,6 +424,72 @@ def get_pontos_turisticos():
 def get_cidades():
     cidades = Cidade.query.all()
     return jsonify([{'nome': cidade.nome, 'estado': cidade.estado, 'populacao': cidade.populacao} for cidade in cidades]), 200
+
+@app.route('/add-cidade', methods=['POST'])
+def add_cidade():
+    nome = request.form.get('nome')
+    estado = request.form.get('estado')
+    populacao = request.form.get('populacao')
+    imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+    if nome and estado and populacao:
+        # Processar a imagem da cidade como um BLOB
+        imagem_blob = imagem.read() if imagem else None  # Ou converta para Base64 se o banco exigir
+
+        nova_cidade = Cidade(nome=nome, estado=estado, populacao=populacao, imagem=imagem_blob)
+        db.session.add(nova_cidade)
+        db.session.commit()
+        return jsonify({'message': 'Cidade adicionada com sucesso'}), 201
+    else:
+        return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+
+@app.route('/add-hotel', methods=['POST'])
+def add_hotel():
+    nome = request.form.get('nome')
+    categoria = request.form.get('categoria')
+    descricao = request.form.get('descricao')
+    imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+    if nome and categoria and descricao:
+        novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, imagem=imagem)
+        db.session.add(novo_hotel)
+        db.session.commit()
+        return jsonify({'message': 'Hotel cadastrado com sucesso'}), 201
+    else:
+        return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+@app.route('/add-restaurante', methods=['POST'])
+def add_restaurante():
+    nome = request.form.get('nome')
+    especialidade = request.form.get('especialidade')
+    preco_medio = request.form.get('preco_medio')
+    categoria = request.form.get('categoria')
+    descricao = request.form.get('descricao')
+    imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+    if nome and especialidade and preco_medio and categoria and descricao:
+        novo_restaurante = Restaurante(nome=nome, especialidade=especialidade, preco_medio=preco_medio,
+                                       categoria=categoria, descricao=descricao, imagem=imagem)
+        db.session.add(novo_restaurante)
+        db.session.commit()
+        return jsonify({'message': 'Restaurante cadastrado com sucesso'}), 201
+    else:
+        return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+@app.route('/add-ponto-turistico', methods=['POST'])
+def add_ponto_turistico():
+    nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+    if nome and descricao:
+        novo_ponto_turistico = PontoTuristico(nome=nome, descricao=descricao, imagem=imagem)
+        db.session.add(novo_ponto_turistico)
+        db.session.commit()
+        return jsonify({'message': 'Ponto turístico cadastrado com sucesso'}), 201
+    else:
+        return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
 
 
 if __name__ == "__main__":
