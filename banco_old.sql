@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS public."Visita"
     tipo_visita integer,
     codigo_cidade integer,
     PRIMARY KEY (codigo),
-    codigo_hotel
+    codigo_hotel integer
 );
 
 CREATE TABLE IF NOT EXISTS public."Cidade"
@@ -338,6 +338,20 @@ ADD imagem bytea;
 -- Adicionando suporte para imagem na tabela "Restaurante"
 ALTER TABLE public."Restaurante"
 ADD imagem bytea;
+
+-- Criação da Tabela Carrinho
+CREATE TABLE Carrinho (
+    codigo SERIAL PRIMARY KEY,
+    codigo_cliente INTEGER REFERENCES Cliente(codigo)
+);
+
+-- Criação da Tabela Carrinho_Pacote para associar pacotes ao carrinho
+CREATE TABLE Carrinho_Pacote (
+    carrinho_codigo INTEGER REFERENCES Carrinho(codigo),
+    pacote_codigo INTEGER REFERENCES Pacote(codigo),
+    PRIMARY KEY (carrinho_codigo, pacote_codigo)
+);
+
 
 
 -------- Gatilhos ---------

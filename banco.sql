@@ -1,5 +1,4 @@
 -- Criar tabelas
-BEGIN;
 
 CREATE TABLE IF NOT EXISTS public."Pacote"
 (
@@ -60,7 +59,8 @@ CREATE TABLE IF NOT EXISTS public."Quarto"
     codigo serial PRIMARY KEY,
     nome character varying(63),
     valor double precision,
-    tipo character varying(63)
+    tipo character varying(63),
+    codigo_hotel integer
 );
 
 CREATE TABLE IF NOT EXISTS public."Casa de Show"
@@ -185,9 +185,10 @@ ALTER TABLE public."Restaurante"
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
+
 ALTER TABLE public."Quarto"
     ADD FOREIGN KEY (codigo_hotel)
-    REFERENCES public."Hotel" (codigo_visita) MATCH SIMPLE
+    REFERENCES public."Hotel" (codigo) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
@@ -257,7 +258,20 @@ ALTER TABLE public."Pacote_Visita"
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
-END;
+
+-- Criação da Tabela Carrinho
+CREATE TABLE public."Carrinho" (
+    codigo SERIAL PRIMARY KEY,
+    codigo_cliente INTEGER REFERENCES public."Cliente"(codigo)
+);
+
+-- Criação da Tabela Carrinho_Pacote para associar pacotes ao carrinho
+CREATE TABLE public."Carrinho_Pacote" (
+    carrinho_codigo INTEGER REFERENCES public."Carrinho"(codigo),
+    pacote_codigo INTEGER REFERENCES public."Pacote"(codigo),
+    PRIMARY KEY (carrinho_codigo, pacote_codigo)
+);
+
 
 -------- Gatilhos ---------
 

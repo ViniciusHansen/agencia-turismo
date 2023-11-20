@@ -189,6 +189,17 @@ class Pacote_Visita(db.Model):
     datahora_ini = db.Column(db.DateTime)
     datahora_fim = db.Column(db.DateTime)
 
+class Carrinho(db.Model):
+    __tablename__ = 'Carrinho'
+    codigo = db.Column(db.Integer, primary_key=True)
+    codigo_cliente = db.Column(db.Integer, db.ForeignKey('Cliente.codigo'))
+    pacotes = db.relationship('Pacote', secondary='carrinho_pacote')
+
+class Carrinho_Pacote(db.Model):
+    __tablename__ = 'carrinho_pacote'
+    carrinho_codigo = db.Column(db.Integer, db.ForeignKey('Carrinho.codigo'), primary_key=True)
+    pacote_codigo = db.Column(db.Integer, db.ForeignKey('Pacote.codigo'), primary_key=True)
+
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -459,6 +470,28 @@ def add_hotel():
     else:
         return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
 
+# #######################################    
+# testar
+# @app.route('/add-hotel', methods=['POST'])
+# def add_hotel():
+#     nome = request.form.get('nome')
+#     categoria = request.form.get('categoria')
+#     descricao = request.form.get('descricao')
+#     imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+#     if nome and categoria and descricao:
+#         # Converter a imagem para um fluxo de bytes
+#         imagem_blob = imagem.read() if imagem else None
+
+#         novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, imagem=imagem_blob)
+#         db.session.add(novo_hotel)
+#         db.session.commit()
+#         return jsonify({'message': 'Hotel cadastrado com sucesso'}), 201
+#     else:
+#         return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+    
+
 @app.route('/add-restaurante', methods=['POST'])
 def add_restaurante():
     nome = request.form.get('nome')
@@ -490,6 +523,63 @@ def add_ponto_turistico():
         return jsonify({'message': 'Ponto turístico cadastrado com sucesso'}), 201
     else:
         return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+
+@app.route('/carrinho/add', methods=['POST'])
+@jwt_required()
+def add_to_carrinho():
+    data = request.get_json()
+    cliente_id = get_jwt_identity()
+    cliente = Cliente.query.filter_by(email=cliente_id).first()
+
+    if cliente:
+        carrinho = Carrinho.query.filter_by(codigo_cliente=cliente.codigo).first()
+        if not carrinho:
+            carrinho = Carrinho(codigo_cliente=cliente.codigo)
+            db.session.add(carrinho)
+        
+        pacote = Pacote.query.get(data['pacote_codigo'])
+        if pacote and pacote not in carrinho.pacotes:
+            carrinho.pacotes.append(pacote)
+            db.session.commit()
+            return jsonify({'message': 'Pacote added to cart'}), 200
+        return jsonify({'message': 'Package not found or already in cart'}), 404
+    return jsonify({'message': 'Customer not found'}), 404
+
+
+@app.route('/carrinho/remove', methods=['POST'])
+@jwt_required()
+def remove_from_carrinho():
+    data = request.get_json()
+    cliente_id = get_jwt_identity()
+    cliente = Cliente.query.filter_by(email=cliente_id).first()
+
+    if cliente:
+        carrinho = Carrinho.query.filter_by(codigo_cliente=cliente.codigo).first()
+        if carrinho:
+            pacote = Pacote.query.get(data['pacote_codigo'])
+            if pacote and pacote in carrinho.pacotes:
+                carrinho.pacotes.remove(pacote)
+                db.session.commit()
+                return jsonify({'message': 'Pacote removed from cart'}), 200
+            return jsonify({'message': 'Package not found in cart'}), 404
+        return jsonify({'message': 'Cart not found'}), 404
+    return jsonify({'message': 'Customer not found'}), 404
+
+
+@app.route('/carrinho/view', methods=['GET'])
+@jwt_required()
+def view_carrinho():
+    cliente_id = get_jwt_identity()
+    cliente = Cliente.query.filter_by(email=cliente_id).first()
+
+    if cliente:
+        carrinho = Carrinho.query.filter_by(codigo_cliente=cliente.codigo).first()
+        if carrinho:
+            pacotes = [{'codigo': p.codigo, 'nome': p.nome, 'valor': p.valor} for p in carrinho.pacotes]
+            return jsonify({'pacotes': pacotes}), 200
+        return jsonify({'message': 'No cart found'}), 404
+    return jsonify({'message': 'Customer not found'}), 404
 
 
 if __name__ == "__main__":
