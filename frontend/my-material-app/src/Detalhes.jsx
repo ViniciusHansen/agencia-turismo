@@ -15,11 +15,12 @@ import {
   Container,
 } from "@mui/material";
 
-const Detalhes = ({ goBack, pacote }) => {
-
-  console.log(pacote)
+const Detalhes = ({ pacote, onAdd, goBack }) => {
+  console.log("Pacote [Detalhes.jsx]: ",pacote);
   const classes = useStyles();
   let pontoInteresseImagem, pontoInteresseTitulo, pontoInteresseSubtitulo;
+
+  //======LOGICA MERDA=======
 
   if (pacote.hotel) {
     // Se existir 'hotel' no pacote, defina as variáveis para renderizar informações do hotel
@@ -37,7 +38,7 @@ const Detalhes = ({ goBack, pacote }) => {
     pontoInteresseTitulo = pacote.pontoTuristico.nome;
     pontoInteresseSubtitulo = pacote.pontoTuristico.descricao; // Substitua pelo que for apropriado para seu app
   }
-
+  //==========================
   return (
     <>
       <CssBaseline />
@@ -115,7 +116,15 @@ const Detalhes = ({ goBack, pacote }) => {
         <div className={classes.button}>
           <Grid container spacing={5} justifyContent="center">
             <Grid item>
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  onAdd(pacote);
+                  alert("Visita adicionada com sucesso!");
+                  goBack();
+                }}
+              >
                 Reservar
               </Button>
               <Button variant="outlined" color="primary" onClick={goBack}>

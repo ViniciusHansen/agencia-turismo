@@ -22,12 +22,13 @@ import {
   Toolbar,
   Container,
 } from "@mui/material";
+import Carrinho from "./Carrinho";
 
 const destinos = ["Joinville", "Florianópolis"];
 
 const App = () => {
   const classes = useStyles();
-  const [viewDetails, setViewDetails] = useState(false);
+  const [viewDetails, setViewDetails] = useState(null);
   const [viewSignInSide, setViewSignInSide] = useState(false);
   const [viewSignUp, setViewSignUp] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
@@ -38,7 +39,23 @@ const App = () => {
   const [viewCadastroPontoTuristico, setViewCadastroPontoTuristico] =
     useState(false);
   const [viewCadastroHotel, setViewCadastroHotel] = useState(false);
+  const [viewCarrinho, setViewCarrinho] = useState(false);
   const [pacotes, setPacotes] = useState([]);
+
+  const [carrinho, setCarrinho] = useState([]);
+
+  const adicionarAoCarrinho = (item) => {
+    setCarrinho([...carrinho, item]);
+    // console.log(carrinho);
+  };
+
+  // const removerDoCarrinho = (itemId) => {
+  //   setCarrinho(carrinho.filter((item) => item.id !== itemId));
+  // };
+
+  const removerDoCarrinho = (codigoItem) => {
+    setCarrinho(carrinho.filter((item) => item.codigo !== codigoItem));
+  };
 
   useEffect(() => {
     // Função para carregar os pacotes.
@@ -46,7 +63,7 @@ const App = () => {
       try {
         const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
         const data = await response.json();
-        console.log(data);
+        console.log("Visitas [App.jsx]: ", data);
         setPacotes(data); // Atualizando o estado com os dados recebidos.
       } catch (error) {
         console.error("Falha ao buscar pacotes:", error);
@@ -54,7 +71,9 @@ const App = () => {
     };
 
     fetchPacotes(); // Chamada da função no carregamento do componente.
-  }, []); // Array de dependências vazio, indica que o efeito será executado uma vez após o render inicial.
+
+    console.log("Carrinho [App.jsx]: ", carrinho);
+  }, [carrinho]); // Array de dependências vazio, indica que o efeito será executado uma vez após o render inicial.
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -91,12 +110,17 @@ const App = () => {
   if (viewCadastroHotel) {
     return <HotelCadastro goBack={() => setViewCadastroHotel(null)} />;
   }
-
+  //=========SUSPEITO============
   if (viewDetails) {
     return (
-      <Detalhes pacote={viewDetails} goBack={() => setViewDetails(null)} />
+      <Detalhes
+        pacote={viewDetails}
+        onAdd={adicionarAoCarrinho}
+        goBack={() => setViewDetails(null)}
+      />
     );
   }
+  //=============================
   if (viewSignInSide) {
     return (
       <LoginPage
@@ -115,6 +139,17 @@ const App = () => {
       <Register
         goBack={() => setViewSignUp(false)}
         onSuccess={() => setViewSignUp(false)}
+      />
+    );
+  }
+
+  if (viewCarrinho) {
+    return (
+      <Carrinho
+        itens={carrinho}
+        onRemove={removerDoCarrinho}
+        goBack={() => setViewCarrinho(false)}
+        username={username}
       />
     );
   }
@@ -172,6 +207,14 @@ const App = () => {
                 onClick={setViewCadastroPontoTuristico}
               >
                 Cadastrar Ponto Turístico
+              </Button>
+
+              <Button
+                color="inherit"
+                variant="outlined"
+                onClick={setViewCarrinho}
+              >
+                Carrinho
               </Button>
             </>
           ) : (

@@ -3,9 +3,7 @@
 CREATE TABLE IF NOT EXISTS public."Pacote"
 (
     codigo serial PRIMARY KEY,
-    valor double precision,
-    data_ini date,
-    data_fim date
+    valor double precision
 );
 
 CREATE TABLE IF NOT EXISTS public."Visita"
@@ -143,9 +141,7 @@ CREATE TABLE IF NOT EXISTS public."Cliente_Pacote"
 CREATE TABLE IF NOT EXISTS public."Pacote_Visita"
 (
     "Pacote_codigo" integer,
-    "Visita_codigo" integer,
-    "datahora_ini" timestamp WITHOUT time zone,
-    "datahora_fim" timestamp WITHOUT time zone
+    "Visita_codigo" integer
 );
 
 -- Chaves Estrangeiras
@@ -390,24 +386,4 @@ CREATE TRIGGER cnpj_valido
 BEFORE INSERT OR UPDATE ON "Pessoa Juridica"
 FOR EACH ROW
 EXECUTE PROCEDURE fn_verify_cnpj_valid();
-
-
--- DATA INICIO DO PACOTE ANTES DA DATA FIM
------------------------------------------------------------
-
-CREATE OR REPLACE FUNCTION data_antes_de_fim()
-RETURNS TRIGGER AS $$
-BEGIN
-	IF (NEW.DATAHORA_INI < NEW.DATAHORA_FIM) THEN
-		RETURN NEW;
-	ELSE
-		RAISE EXCEPTION 'A data de fim do pacote não pode ser antes do início';
-	END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER datahora_pacote_compara
-BEFORE INSERT OR UPDATE ON "Pacote_Visita"
-FOR EACH ROW
-EXECUTE PROCEDURE data_antes_de_fim();
 

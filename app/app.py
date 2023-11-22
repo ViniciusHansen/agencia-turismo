@@ -27,8 +27,6 @@ class Pacote(db.Model):
     __tablename__ = 'Pacote'
     codigo = db.Column(db.Integer, primary_key=True)
     valor = db.Column(db.Float)
-    data_ini = db.Column(db.Date)
-    data_fim = db.Column(db.Date)
 
 
 class Cidade(db.Model):
@@ -186,8 +184,7 @@ class Pacote_Visita(db.Model):
         'Pacote.codigo'), primary_key=True)
     Visita_codigo = db.Column(db.Integer, db.ForeignKey(
         'Visita.codigo'), primary_key=True)
-    datahora_ini = db.Column(db.DateTime)
-    datahora_fim = db.Column(db.DateTime)
+
 
 class Carrinho(db.Model):
     __tablename__ = 'Carrinho'
@@ -469,6 +466,41 @@ def add_hotel():
         return jsonify({'message': 'Hotel cadastrado com sucesso'}), 201
     else:
         return jsonify({'message': 'Campos obrigatórios não preenchidos'}), 400
+
+def get_codigo(email_usuario):
+    cliente = Cliente.query.filter_by(email=email_usuario).first()
+    if cliente:
+        return cliente.codigo
+
+
+@app.route('/api/checkout', methods=['POST'])
+def checkout():
+    data = request.json
+    itens = data['itens']
+    usuario = data['usuario']
+
+
+    # Criar um novo pacote (ajuste de acordo com seus campos e lógica)
+    novo_pacote = Pacote(valor=5000)
+    db.session.add(novo_pacote)
+    db.session.flush()  # Para obter o código do pacote antes do commit
+
+    # Associar cada item do carrinho ao pacote
+    for item in itens:
+        pacote_visita = Pacote_Visita(Pacote_codigo=novo_pacote.codigo, Visita_codigo=item['codigo'])
+        db.session.add(pacote_visita)
+
+    # Associar pacote ao cliente (ajuste conforme necessário)
+    cliente_pacote = Cliente_Pacote(Cliente_codigo=get_codigo(usuario), Pacote_codigo=novo_pacote.codigo)
+    db.session.add(cliente_pacote)
+
+    db.session.commit()
+
+    return jsonify({"pacoteCodigo": novo_pacote.codigo}), 200
+
+
+
+
 
 # #######################################    
 # testar
