@@ -614,5 +614,44 @@ def view_carrinho():
     return jsonify({'message': 'Customer not found'}), 404
 
 
+@app.route('/admin/pacotes', methods=['GET'])
+# @jwt_required()
+def admin_pacotes():
+    # Esta rota é acessível apenas por administradores
+    # Aqui, você pode adicionar lógica para verificar se o usuário é um administrador
+
+    # Buscar todos os pacotes reservados e seus detalhes
+    pacotes_reservados = db.session.query(Cliente_Pacote, Cliente, Pacote).join(
+        Cliente, Cliente_Pacote.Cliente_codigo == Cliente.codigo).join(
+        Pacote, Cliente_Pacote.Pacote_codigo == Pacote.codigo).all()
+
+    resultado = []
+    for cliente_pacote, cliente, pacote in pacotes_reservados:
+        pacote_info = {
+            'pacote_codigo': pacote.codigo,
+            'valor': pacote.valor,
+            'cliente': {
+                'cliente_codigo': cliente.codigo,
+                'email': cliente.email
+            },
+            'visitas': []
+        }
+
+        # Buscar as visitas associadas a cada pacote
+        visitas_pacote = Pacote_Visita.query.filter_by(Pacote_codigo=pacote.codigo).all()
+        for visita_pacote in visitas_pacote:
+            visita = Visita.query.get(visita_pacote.Visita_codigo)
+            if visita:
+                pacote_info['visitas'].append({
+                    'visita_codigo': visita.codigo,
+                    'nome': visita.nome,
+                    # inclua outros detalhes da visita conforme necessário
+                })
+
+        resultado.append(pacote_info)
+
+    return jsonify(resultado), 200
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

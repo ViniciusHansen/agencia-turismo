@@ -23,6 +23,7 @@ import {
   Container,
 } from "@mui/material";
 import Carrinho from "./Carrinho";
+import AdminPanel from "./AdminPanel";
 
 const destinos = ["Joinville", "Florianópolis"];
 
@@ -40,6 +41,7 @@ const App = () => {
     useState(false);
   const [viewCadastroHotel, setViewCadastroHotel] = useState(false);
   const [viewCarrinho, setViewCarrinho] = useState(false);
+  const [viewADMPanel, setViewADMPanel] = useState(false);
   const [pacotes, setPacotes] = useState([]);
 
   const [carrinho, setCarrinho] = useState([]);
@@ -154,6 +156,10 @@ const App = () => {
     );
   }
 
+  if (viewADMPanel) {
+    return <AdminPanel goBack={() => setViewADMPanel(false)} />;
+  }
+
   return (
     <>
       <CssBaseline />
@@ -215,6 +221,12 @@ const App = () => {
                 onClick={setViewCarrinho}
               >
                 Carrinho
+              </Button>
+              <Button
+              color="inherit"
+              variant="outlined"
+              onClick={setViewADMPanel}>
+                ADM Panel
               </Button>
             </>
           ) : (
