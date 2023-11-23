@@ -91,13 +91,22 @@ const Carrinho = ({ itens, onRemove, goBack, username }) => {
                 <Card className={classes.card}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <CardMedia
+                      {/* <CardMedia
                         className={classes.cardMedia}
                         image={
                           item.imagem ||
                           "https://demofree.sirv.com/nope-not-here.jpg"
                         }
                         title={item.nome}
+                      /> */}
+                      <img
+                        src={
+                          item.cidade.imagem
+                            ? `data:image/png;base64, ${item.cidade.imagem}`
+                            : "https://demofree.sirv.com/nope-not-here.jpg"
+                        }
+                        alt="Imagem da cidade"
+                        style={{ width: '215px', height: '200px',objectFit: 'cover'  }}
                       />
                     </Grid>
 
