@@ -19,25 +19,36 @@ const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
   console.log("Pacote [Detalhes.jsx]: ", pacote);
   const classes = useStyles();
   let pontoInteresseImagem, pontoInteresseTitulo, pontoInteresseSubtitulo;
+  console.log("Hoteis:", pacote.hoteis);
+  console.log("Restaurantes:", pacote.restaurantes);
+  console.log("Pontos Turísticos:", pacote.pontos_turisticos);
 
-  //======LOGICA MERDA=======
+  //=========================
 
-  if (pacote.hotel) {
-    // Se existir 'hotel' no pacote, defina as variáveis para renderizar informações do hotel
-    pontoInteresseImagem = pacote.hoteis.imagem;
-    pontoInteresseTitulo = pacote.hoteis.nome;
-    pontoInteresseSubtitulo = pacote.hoteis.descricao; // Substitua pelo que for apropriado para seu app
-  } else if (pacote.restaurante) {
-    // Se existir 'restaurante' no pacote, defina as variáveis para renderizar informações do restaurante
-    pontoInteresseImagem = pacote.restaurante.imagem;
-    pontoInteresseTitulo = pacote.restaurante.nome;
-    pontoInteresseSubtitulo = `Especialidade: ${pacote.restaurante.especialidade}`;
-  } else if (pacote.pontoTuristico) {
-    // Se existir 'pontoTuristico' no pacote, defina as variáveis para renderizar informações do ponto turístico
-    pontoInteresseImagem = pacote.pontoTuristico.imagem;
-    pontoInteresseTitulo = pacote.pontoTuristico.nome;
-    pontoInteresseSubtitulo = pacote.pontoTuristico.descricao; // Substitua pelo que for apropriado para seu app
+  pontoInteresseImagem = "https://demofree.sirv.com/nope-not-here.jpg";
+  pontoInteresseTitulo = "Sem informações adicionais";
+  pontoInteresseSubtitulo =
+    "Não há informações adicionais disponíveis para este pacote.";
+
+  // Se o tipo de visita for 'hotel'
+  if (pacote.hoteis.length > 0) {
+    // pontoInteresseImagem = pacote.hoteis[0].imagem;
+    pontoInteresseTitulo = pacote.hoteis[0].nome;
+    pontoInteresseSubtitulo = pacote.hoteis[0].descricao;
   }
+  // Se o tipo de visita for 'restaurante'
+  else if (pacote.restaurantes.length > 0) {
+    // pontoInteresseImagem = pacote.restaurantes[0].imagem;
+    pontoInteresseTitulo = pacote.restaurantes[0].nome;
+    pontoInteresseSubtitulo = `Especialidade: ${pacote.restaurantes[0].especialidade}`;
+  }
+  // Se o tipo de visita for 'pontoTuristico'
+  else if (pacote.pontos_turisticos.length > 0) {
+    // pontoInteresseImagem = pacote.pontos_turisticos[0].imagem;
+    pontoInteresseTitulo = pacote.pontos_turisticos[0].nome;
+    pontoInteresseSubtitulo = pacote.pontos_turisticos[0].descricao;
+  }
+
   //==========================
   return (
     <>
@@ -84,7 +95,7 @@ const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
                 />
                 <CardContent className={classes.cardContent}>
                   <Typography gutterBottom variant="h5">
-                    {pacote.cidade.descricao}
+                    {pacote.cidade.nome}
                   </Typography>
                   <Typography>{pacote.cidade.estado}</Typography>
                 </CardContent>
