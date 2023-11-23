@@ -64,6 +64,43 @@ const VisitaInput = ({ goBack }) => {
     }
   }, [tipoSelecao]);
 
+  useEffect(() => {
+    // ...
+
+    axios
+      .get(`/restaurantes?cidade=${visita.cidade ? visita.cidade.value : ""}`)
+      .then((response) => {
+        const restauranteOptions = response.data.map((restaurante) => ({
+          value: restaurante.nome,
+          label: restaurante.nome,
+        }));
+        setRestaurantes(restauranteOptions);
+      });
+
+    axios
+      .get(
+        `/pontos-turisticos?cidade=${visita.cidade ? visita.cidade.value : ""}`
+      )
+      .then((response) => {
+        const pontoTuristicoOptions = response.data.map((ponto) => ({
+          value: ponto.nome,
+          label: ponto.nome,
+        }));
+        setPontosTuristicos(pontoTuristicoOptions);
+      });
+
+    axios
+      .get(`/hoteis?cidade=${visita.cidade ? visita.cidade.value : ""}`)
+      .then((response) => {
+        const hotelOptions = response.data.map((hotel) => ({
+          value: hotel.nome,
+          label: hotel.nome,
+        }));
+        setHoteis(hotelOptions);
+      });
+
+  }, [visita.cidade]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setVisita({ ...visita, [name]: value });
@@ -158,7 +195,9 @@ const VisitaInput = ({ goBack }) => {
               label: e.target.value,
             })
           }
-          disabled={tipoSelecao && tipoSelecao !== "restaurante"}
+          disabled={
+            (tipoSelecao && tipoSelecao !== "restaurante") || !visita.cidade
+          }
         >
           <option value="">Selecione um restaurante</option>
           {restaurantes.map((option) => (
@@ -179,7 +218,9 @@ const VisitaInput = ({ goBack }) => {
               label: e.target.value,
             })
           }
-          disabled={tipoSelecao && tipoSelecao !== "pontoTuristico"}
+          disabled={
+            (tipoSelecao && tipoSelecao !== "pontoTuristico") || !visita.cidade
+          }
         >
           <option value="">Selecione um ponto turístico</option>
           {pontosTuristicos.map((option) => (
@@ -200,7 +241,7 @@ const VisitaInput = ({ goBack }) => {
               label: e.target.value,
             })
           }
-          disabled={tipoSelecao && tipoSelecao !== "hotel"}
+          disabled={(tipoSelecao && tipoSelecao !== "hotel") || !visita.cidade}
         >
           <option value="">Selecione um hotel</option>
           {hoteis.map((option) => (

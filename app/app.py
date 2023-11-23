@@ -384,6 +384,11 @@ def add_visita():
 
     return jsonify({'message': 'Visita cadastrada com sucesso'}), 201
 
+@app.route('/cidades', methods=['GET'])
+def get_cidades():
+    cidades = Cidade.query.all()
+    return jsonify([{'nome': cidade.nome, 'estado': cidade.estado, 'populacao': cidade.populacao} for cidade in cidades]), 200
+
 
 @app.route('/pacotes/reservar', methods=['POST'])
 @jwt_required()
@@ -418,23 +423,40 @@ def cancel_reserva():
 
 @app.route('/hoteis', methods=['GET'])
 def get_hoteis():
-    hoteis = Hotel.query.all()
+    cidade_nome = request.args.get('cidade')
+    cidade_associada = Cidade.query.filter_by(nome=cidade_nome).first()
+    
+    if cidade_associada:
+        hoteis = Hotel.query.filter_by(cidade_associada=cidade_associada.codigo).all()
+    else:
+        hoteis = Hotel.query.all()
+
     return jsonify([{'nome': hotel.nome, 'categoria': hotel.categoria, 'descricao': hotel.descricao} for hotel in hoteis]), 200
 
 @app.route('/restaurantes', methods=['GET'])
 def get_restaurantes():
-    restaurantes = Restaurante.query.all()
+    cidade_nome = request.args.get('cidade')
+    cidade_associada = Cidade.query.filter_by(nome=cidade_nome).first()
+    
+    if cidade_associada:
+        restaurantes = Restaurante.query.filter_by(cidade_associada=cidade_associada.codigo).all()
+    else:
+        restaurantes = Restaurante.query.all()
+
     return jsonify([{'nome': restaurante.nome, 'especialidade': restaurante.especialidade, 'preco_medio': restaurante.preco_medio} for restaurante in restaurantes]), 200
 
 @app.route('/pontos-turisticos', methods=['GET'])
 def get_pontos_turisticos():
-    pontos_turisticos = PontoTuristico.query.all()
+    cidade_nome = request.args.get('cidade')
+    cidade_associada = Cidade.query.filter_by(nome=cidade_nome).first()
+    
+    if cidade_associada:
+        pontos_turisticos = PontoTuristico.query.filter_by(cidade_associada=cidade_associada.codigo).all()
+    else:
+        pontos_turisticos = PontoTuristico.query.all()
+
     return jsonify([{'nome': ponto_turistico.nome, 'descricao': ponto_turistico.descricao} for ponto_turistico in pontos_turisticos]), 200
 
-@app.route('/cidades', methods=['GET'])
-def get_cidades():
-    cidades = Cidade.query.all()
-    return jsonify([{'nome': cidade.nome, 'estado': cidade.estado, 'populacao': cidade.populacao} for cidade in cidades]), 200
 
 @app.route('/add-cidade', methods=['POST'])
 def add_cidade():
