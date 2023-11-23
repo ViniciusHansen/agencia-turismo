@@ -389,6 +389,14 @@ def get_cidades():
     cidades = Cidade.query.all()
     return jsonify([{'nome': cidade.nome, 'estado': cidade.estado, 'populacao': cidade.populacao} for cidade in cidades]), 200
 
+@app.route('/obterCodigoCidade/<nome_cidade>', methods=['GET'])
+def obter_codigo_cidade(nome_cidade):
+    cidade = Cidade.query.filter_by(nome=nome_cidade).first()
+
+    if cidade:
+        return jsonify({'codigo': cidade.codigo}), 200
+    else:
+        return jsonify({'error': 'Cidade não encontrada'}), 404
 
 @app.route('/pacotes/reservar', methods=['POST'])
 @jwt_required()

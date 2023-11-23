@@ -26,8 +26,6 @@ import {
 import Carrinho from "./Carrinho";
 import AdminPanel from "./AdminPanel";
 
-const destinos = ["Joinville", "Florianópolis"];
-
 const App = () => {
   const classes = useStyles();
   const [viewDetails, setViewDetails] = useState(null);
@@ -47,6 +45,61 @@ const App = () => {
   const [pacotes, setPacotes] = useState([]);
   const [carrinho, setCarrinho] = useState([]);
   const [cidades, setCidades] = useState([]);
+  const [destinos, setDestinos] = useState([]);
+  const [cidadeSelecionada, setCidadeSelecionada] = useState(null);
+  const [pacotesFiltrados, setPacotesFiltrados] = useState([]);
+
+  
+
+  const handleBuscarClick = () => {
+    // Se cidadeSelecionada for null, não faz nada
+    if (!cidadeSelecionada) {
+      setPacotesFiltrados(pacotes);
+      return;
+    }
+    // console.log("Buscar clicado para a cidade:", cidadeSelecionada);
+    // const codigoCidade = cidades.find(cidade => cidade.label === cidadeSelecionada)?.value;
+
+    axios
+      .get(`/obterCodigoCidade/${cidadeSelecionada}`)
+      .then((response) => {
+        const codigoCidade = response.data.codigo;
+        if (!codigoCidade) {
+          console.error(
+            "Código da cidade não encontrado para:",
+            cidadeSelecionada
+          );
+          return;
+        }
+        console.log("Código da cidade:", codigoCidade);
+
+        // Agora você tem o código da cidade, você pode filtrar os pacotes
+        const pacotesFiltrados_temp = pacotes.filter(
+          (pacote) => pacote.cidade.codigo === codigoCidade
+        );
+        setPacotesFiltrados(pacotesFiltrados_temp);
+        // Faça o que precisar com os pacotes filtrados
+        console.log("Pacotes filtrados:", pacotesFiltrados);
+      })
+      .catch((error) => {
+        console.error("Erro ao obter código da cidade:", error);
+      });
+  };
+
+  useEffect(() => {
+    fetch("/cidades")
+      .then((response) => response.json())
+      .then((data) => {
+        // Ajuste os dados conforme necessário
+        const cidades = data.map(
+          //(cidade) => `${cidade.nome}, ${cidade.estado}`
+          (cidade) => `${cidade.nome}`
+        );
+        setDestinos(cidades);
+        console.log("Destinos: ", destinos);
+      })
+      .catch((error) => console.error("Erro ao buscar cidades:", error));
+  }, []); // O array vazio como segundo argumento faz com que o useEffect rode apenas uma vez quando o componente montar.
 
   const adicionarAoCarrinho = (item) => {
     setCarrinho([...carrinho, item]);
@@ -65,6 +118,7 @@ const App = () => {
         const data = await response.json();
         console.log("Visitas [App.jsx]: ", data);
         setPacotes(data); // Atualizando o estado com os dados recebidos.
+        setPacotesFiltrados(data);
       } catch (error) {
         console.error("Falha ao buscar pacotes:", error);
       }
@@ -301,11 +355,21 @@ const App = () => {
             <div className={classes.button}>
               <Grid container spacing={2} justifyContent="center">
                 <Grid item>
-                  <Autocomplete placeholder="Destino" options={destinos} />
+                  <Autocomplete
+                    placeholder="Destino"
+                    options={destinos}
+                    onChange={(event, newValue) =>
+                      setCidadeSelecionada(newValue)
+                    }
+                  />
                 </Grid>
 
                 <Grid item>
-                  <Button variant="contained" color="primary">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleBuscarClick}
+                  >
                     Buscar
                   </Button>
                 </Grid>
@@ -315,7 +379,7 @@ const App = () => {
         </div>
         <Container className={classes.cardGrid} maxWidth="md">
           <Grid container spacing={4}>
-            {pacotes.map((pacote) => (
+            {pacotesFiltrados.map((pacote) => (
               <Grid item key={pacote.codigo} xs={12} md={6}>
                 <Card className={classes.card}>
                   <Grid container spacing={2}>
