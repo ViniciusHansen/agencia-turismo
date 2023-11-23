@@ -69,10 +69,6 @@ const VisitaInput = ({ goBack }) => {
     setVisita({ ...visita, [name]: value });
   };
 
-  // const handleSelectChange = (name, selectedOption) => {
-  //   setVisita({ ...visita, [name]: selectedOption });
-  // };
-
   const handleSelectChange = (name, selectedOption) => {
     // Ajustar apenas para restaurante, pontoTuristico e hotel
     if (["restaurante", "pontoTuristico", "hotel"].includes(name)) {
@@ -131,15 +127,6 @@ const VisitaInput = ({ goBack }) => {
           onChange={handleInputChange}
         />
       </div>
-      {/* <div>
-        <label>Tipo de Visita</label>
-        <input
-          type="text"
-          name="tipo_visita"
-          value={visita.tipo_visita}
-          onChange={handleInputChange}
-        />
-      </div> */}
       <div>
         <label>Cidade</label>
         <select

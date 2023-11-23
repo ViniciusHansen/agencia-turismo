@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
-const PontoTuristicoCadastro = ({goBack}) => {
+const PontoTuristicoCadastro = ({ goBack, cidades}) => {
   const [pontoTuristicoData, setPontoTuristicoData] = useState({
-    nome: '',
-    descricao: '',
+    cidadeAssociada : "",
+    nome: "",
+    descricao: "",
     imagem: null, // Para carregar a imagem do ponto turístico
   });
+
+  const handleSelectChange = (fieldName, selectedOption) => {
+    setPontoTuristicoData({ ...pontoTuristicoData, [fieldName]: selectedOption.value });
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -20,27 +25,28 @@ const PontoTuristicoCadastro = ({goBack}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const formData = new FormData();
-    formData.append('nome', pontoTuristicoData.nome);
-    formData.append('descricao', pontoTuristicoData.descricao);
-    formData.append('imagem', pontoTuristicoData.imagem);
 
+    const formData = new FormData();
+    formData.append("cidadeAssociada", pontoTuristicoData.cidadeAssociada)
+    formData.append("nome", pontoTuristicoData.nome);
+    formData.append("descricao", pontoTuristicoData.descricao);
+    formData.append("imagem", pontoTuristicoData.imagem);
+    console.log("Formulario [PontoTuristicoCadastro.jsx]: ",formData)
     try {
-      const response = await axios.post('/add-ponto-turistico', formData, {
+      const response = await axios.post("/add-ponto-turistico", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       alert(response.data.message);
       // Limpe o estado do formulário após o cadastro bem-sucedido
       setPontoTuristicoData({
-        nome: '',
-        descricao: '',
+        nome: "",
+        descricao: "",
         imagem: null,
       });
     } catch (error) {
-      console.error('Erro ao cadastrar ponto turístico:', error);
+      console.error("Erro ao cadastrar ponto turístico:", error);
     }
   };
 
@@ -49,16 +55,52 @@ const PontoTuristicoCadastro = ({goBack}) => {
       <h2>Cadastro de Ponto Turístico</h2>
       <form onSubmit={handleSubmit}>
         <div>
+          <label>Cidade Associada:</label>
+          <select
+            name="cidade"
+            value={
+              pontoTuristicoData.cidade ? pontoTuristicoData.cidade.value : ""
+            }
+            onChange={(e) =>
+              handleSelectChange("cidadeAssociada", {
+                value: e.target.value,
+                label: e.target.value,
+              })
+            }
+          >
+            <option value="">Selecione uma cidade</option>
+            {cidades.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
           <label>Nome:</label>
-          <input type="text" name="nome" value={pontoTuristicoData.nome} onChange={handleInputChange} />
+          <input
+            type="text"
+            name="nome"
+            value={pontoTuristicoData.nome}
+            onChange={handleInputChange}
+          />
         </div>
         <div>
           <label>Descrição:</label>
-          <textarea name="descricao" value={pontoTuristicoData.descricao} onChange={handleInputChange} />
+          <textarea
+            name="descricao"
+            value={pontoTuristicoData.descricao}
+            onChange={handleInputChange}
+          />
         </div>
         <div>
           <label>Imagem:</label>
-          <input type="file" name="imagem" accept="image/*" onChange={handleImagemChange} />
+          <input
+            type="file"
+            name="imagem"
+            accept="image/*"
+            onChange={handleImagemChange}
+          />
         </div>
         <div>
           <button type="submit">Cadastrar Ponto Turístico</button>

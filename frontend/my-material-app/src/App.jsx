@@ -3,6 +3,7 @@ import Button from "@mui/material/Button";
 import Autocomplete from "@mui/joy/Autocomplete";
 import useStyles from "./styles";
 import Detalhes from "./Detalhes";
+import axios from "axios";
 import LoginPage from "./LoginDIY";
 import Register from "./RegisterDIY";
 import VisitaInput from "./VisitaInput";
@@ -33,6 +34,7 @@ const App = () => {
   const [viewSignInSide, setViewSignInSide] = useState(false);
   const [viewSignUp, setViewSignUp] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [username, setUsername] = useState("");
   const [viewPacoteForm, setViewPacoteForm] = useState(false);
   const [viewCadastroCidade, setViewCadastroCidade] = useState(false);
@@ -43,17 +45,13 @@ const App = () => {
   const [viewCarrinho, setViewCarrinho] = useState(false);
   const [viewADMPanel, setViewADMPanel] = useState(false);
   const [pacotes, setPacotes] = useState([]);
-
   const [carrinho, setCarrinho] = useState([]);
+  const [cidades, setCidades] = useState([]);
 
   const adicionarAoCarrinho = (item) => {
     setCarrinho([...carrinho, item]);
     // console.log(carrinho);
   };
-
-  // const removerDoCarrinho = (itemId) => {
-  //   setCarrinho(carrinho.filter((item) => item.id !== itemId));
-  // };
 
   const removerDoCarrinho = (codigoItem) => {
     setCarrinho(carrinho.filter((item) => item.codigo !== codigoItem));
@@ -77,6 +75,16 @@ const App = () => {
     console.log("Carrinho [App.jsx]: ", carrinho);
   }, [carrinho]); // Array de dependências vazio, indica que o efeito será executado uma vez após o render inicial.
 
+  useEffect(() => {
+    axios.get("/cidades").then((response) => {
+      const cidadeOptions = response.data.map((cidade) => ({
+        value: cidade.nome,
+        label: cidade.nome,
+      }));
+      setCidades(cidadeOptions);
+    });
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("access_token");
 
@@ -99,18 +107,27 @@ const App = () => {
     return (
       <PontoTuristicoCadastro
         goBack={() => setViewCadastroPontoTuristico(null)}
+        cidades={cidades}
       />
     );
   }
 
   if (viewCadastroRestaurante) {
     return (
-      <RestauranteCadastro goBack={() => setViewCadastroRestaurante(null)} />
+      <RestauranteCadastro
+        goBack={() => setViewCadastroRestaurante(null)}
+        cidades={cidades}
+      />
     );
   }
 
   if (viewCadastroHotel) {
-    return <HotelCadastro goBack={() => setViewCadastroHotel(null)} />;
+    return (
+      <HotelCadastro
+        goBack={() => setViewCadastroHotel(null)}
+        cidades={cidades}
+      />
+    );
   }
   //=========SUSPEITO============
   if (viewDetails) {
@@ -119,6 +136,7 @@ const App = () => {
         pacote={viewDetails}
         onAdd={adicionarAoCarrinho}
         goBack={() => setViewDetails(null)}
+        isLogged={isLogged}
       />
     );
   }
@@ -132,6 +150,8 @@ const App = () => {
           setIsLogged(true);
         }}
         updateUsername={setUsername}
+        isAdmin={isAdmin}
+        setIsAdmin={setIsAdmin}
       />
     );
   }
@@ -178,42 +198,55 @@ const App = () => {
                 Logout
               </Button>
 
-              <Button
-                color="inherit"
-                variant="outlined"
-                onClick={setViewPacoteForm}
-              >
-                Cadastrar Visitas
-              </Button>
+              {isAdmin ? (
+                <>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewPacoteForm}
+                  >
+                    Cadastrar Visitas
+                  </Button>
 
-              <Button
-                color="inherit"
-                variant="outlined"
-                onClick={setViewCadastroHotel}
-              >
-                Cadastrar Hotel
-              </Button>
-              <Button
-                color="inherit"
-                variant="outlined"
-                onClick={setViewCadastroRestaurante}
-              >
-                Cadastrar Restaurante
-              </Button>
-              <Button
-                color="inherit"
-                variant="outlined"
-                onClick={setViewCadastroCidade}
-              >
-                Cadastrar Cidade
-              </Button>
-              <Button
-                color="inherit"
-                variant="outlined"
-                onClick={setViewCadastroPontoTuristico}
-              >
-                Cadastrar Ponto Turístico
-              </Button>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewCadastroHotel}
+                  >
+                    Cadastrar Hotel
+                  </Button>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewCadastroRestaurante}
+                  >
+                    Cadastrar Restaurante
+                  </Button>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewCadastroCidade}
+                  >
+                    Cadastrar Cidade
+                  </Button>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewCadastroPontoTuristico}
+                  >
+                    Cadastrar Ponto Turístico
+                  </Button>
+                  <Button
+                    color="inherit"
+                    variant="outlined"
+                    onClick={setViewADMPanel}
+                  >
+                    ADM Panel
+                  </Button>
+                </>
+              ) : (
+                <></>
+              )}
 
               <Button
                 color="inherit"
@@ -221,12 +254,6 @@ const App = () => {
                 onClick={setViewCarrinho}
               >
                 Carrinho
-              </Button>
-              <Button
-              color="inherit"
-              variant="outlined"
-              onClick={setViewADMPanel}>
-                ADM Panel
               </Button>
             </>
           ) : (

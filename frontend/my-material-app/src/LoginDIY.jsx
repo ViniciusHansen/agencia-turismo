@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-function Login({ goBack, onSuccess, updateUsername}) {
+function Login({ goBack, onSuccess, updateUsername, isAdmin, setIsAdmin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-
-
 
   const login = () => {
     axios
@@ -24,6 +22,11 @@ function Login({ goBack, onSuccess, updateUsername}) {
           setMessage("Invalid credentials");
         }
       });
+    if (username == "admin@admin.com") {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
   };
 
   return (

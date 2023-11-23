@@ -15,8 +15,8 @@ import {
   Container,
 } from "@mui/material";
 
-const Detalhes = ({ pacote, onAdd, goBack }) => {
-  console.log("Pacote [Detalhes.jsx]: ",pacote);
+const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
+  console.log("Pacote [Detalhes.jsx]: ", pacote);
   const classes = useStyles();
   let pontoInteresseImagem, pontoInteresseTitulo, pontoInteresseSubtitulo;
 
@@ -120,10 +120,17 @@ const Detalhes = ({ pacote, onAdd, goBack }) => {
                 variant="contained"
                 color="primary"
                 onClick={() => {
-                  onAdd(pacote);
-                  alert("Visita adicionada com sucesso!");
-                  goBack();
+                  if (isLogged) {
+                    onAdd(pacote);
+                    alert("Visita adicionada com sucesso!");
+                    goBack();
+                  } else {
+                    alert("Você precisa estar logado para reservar.");
+                    goBack();
+                  }
                 }}
+                // Desabilita o botão se o usuário não estiver logado
+                disabled={!isLogged}
               >
                 Reservar
               </Button>

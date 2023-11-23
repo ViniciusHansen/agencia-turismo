@@ -69,6 +69,7 @@ class Hotel(db.Model):
     codigo_visita = db.Column(db.Integer, db.ForeignKey(
         'Visita.codigo'))
     imagem = db.Column(db.LargeBinary)
+    cidade_associada = db.Column(db.Integer)
 
 
 class Restaurante(db.Model):
@@ -84,6 +85,7 @@ class Restaurante(db.Model):
     imagem = db.Column(db.LargeBinary)
     nome = db.Column(db.String)
     descricao = db.Column(db.String)
+    cidade_associada = db.Column(db.Integer)
 
 
 class Quarto(db.Model):
@@ -102,6 +104,7 @@ class PontoTuristico(db.Model):
     imagem = db.Column(db.LargeBinary)
     nome = db.Column(db.String)
     descricao = db.Column(db.String)
+    cidade_associada = db.Column(db.Integer)
 
 class CasaDeShow(db.Model):
     __tablename__ = 'Casa de Show'
@@ -458,9 +461,11 @@ def add_hotel():
     categoria = request.form.get('categoria')
     descricao = request.form.get('descricao')
     imagem = request.files['imagem'] if 'imagem' in request.files else None
+    cidadeAssociada = request.form.get('cidadeAssociada')
+    cidade = Cidade.query.filter_by(nome=cidadeAssociada).first()
 
     if nome and categoria and descricao:
-        novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, imagem=imagem)
+        novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, imagem=imagem, cidade_associada=cidade.codigo)
         db.session.add(novo_hotel)
         db.session.commit()
         return jsonify({'message': 'Hotel cadastrado com sucesso'}), 201
@@ -531,11 +536,14 @@ def add_restaurante():
     preco_medio = request.form.get('preco_medio')
     categoria = request.form.get('categoria')
     descricao = request.form.get('descricao')
+    cidadeAssociada = request.form.get('cidadeAssociada')
+    cidade = Cidade.query.filter_by(nome=cidadeAssociada).first()
+
     imagem = request.files['imagem'] if 'imagem' in request.files else None
 
     if nome and especialidade and preco_medio and categoria and descricao:
         novo_restaurante = Restaurante(nome=nome, especialidade=especialidade, preco_medio=preco_medio,
-                                       categoria=categoria, descricao=descricao, imagem=imagem)
+                                       categoria=categoria, descricao=descricao, imagem=imagem, cidade_associada=cidade.codigo)
         db.session.add(novo_restaurante)
         db.session.commit()
         return jsonify({'message': 'Restaurante cadastrado com sucesso'}), 201
@@ -546,10 +554,13 @@ def add_restaurante():
 def add_ponto_turistico():
     nome = request.form.get('nome')
     descricao = request.form.get('descricao')
+    cidadeAssociada = request.form.get('cidadeAssociada')
+    cidade = Cidade.query.filter_by(nome=cidadeAssociada).first()
+
     imagem = request.files['imagem'] if 'imagem' in request.files else None
 
     if nome and descricao:
-        novo_ponto_turistico = PontoTuristico(nome=nome, descricao=descricao, imagem=imagem)
+        novo_ponto_turistico = PontoTuristico(nome=nome, descricao=descricao, imagem=imagem,cidade_associada=cidade.codigo)
         db.session.add(novo_ponto_turistico)
         db.session.commit()
         return jsonify({'message': 'Ponto turístico cadastrado com sucesso'}), 201

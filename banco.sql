@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS public."Hotel"
     codigo_visita integer unique,
     nome character varying(63),
     descricao character varying(300),
-    imagem bytea
+    imagem bytea,
+    cidade_associada integer
 );
 
 CREATE TABLE IF NOT EXISTS public."Restaurante"
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS public."Restaurante"
     hotel_associado integer,
     casa_de_show_associada integer,
     descricao character varying(300),
-    imagem bytea
+    imagem bytea,
+    cidade_associada integer
 );
 
 CREATE TABLE IF NOT EXISTS public."Quarto"
@@ -76,7 +78,8 @@ CREATE TABLE IF NOT EXISTS public."Ponto Turistico"
     descricao character varying(300),
     codigo_visita integer unique,
     nome character varying(63),
-    imagem bytea
+    imagem bytea,
+    cidade_associada integer
 );
 
 CREATE TABLE IF NOT EXISTS public."Museu"
@@ -160,6 +163,24 @@ ALTER TABLE public."Visita"
 ALTER TABLE public."Hotel"
     ADD FOREIGN KEY (codigo_visita)
     REFERENCES public."Visita" (codigo) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ALTER TABLE public."Hotel"
+    ADD FOREIGN KEY (cidade_associada)
+    REFERENCES public."Cidade" (codigo) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ALTER TABLE public."Restaurante"
+    ADD FOREIGN KEY (cidade_associada)
+    REFERENCES public."Cidade" (codigo) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ALTER TABLE public."Ponto Turistico"
+    ADD FOREIGN KEY (cidade_associada)
+    REFERENCES public."Cidade" (codigo) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 
