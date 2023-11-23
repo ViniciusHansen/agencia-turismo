@@ -18,33 +18,40 @@ import {
 const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
   console.log("Pacote [Detalhes.jsx]: ", pacote);
   const classes = useStyles();
-  let pontoInteresseImagem, pontoInteresseTitulo, pontoInteresseSubtitulo;
   console.log("Hoteis:", pacote.hoteis);
   console.log("Restaurantes:", pacote.restaurantes);
   console.log("Pontos Turísticos:", pacote.pontos_turisticos);
 
   //=========================
 
-  pontoInteresseImagem = "https://demofree.sirv.com/nope-not-here.jpg";
-  pontoInteresseTitulo = "Sem informações adicionais";
-  pontoInteresseSubtitulo =
+  const semImagem = "https://demofree.sirv.com/nope-not-here.jpg";
+  let pontoInteresseImagem = null;
+  let pontoInteresseTitulo = "Sem informações adicionais";
+  let pontoInteresseSubtitulo =
     "Não há informações adicionais disponíveis para este pacote.";
 
+  let cidadeImagem = null;
+  if (pacote.cidade.imagem){
+    cidadeImagem = pacote.cidade.imagem;
+  }
   // Se o tipo de visita for 'hotel'
-  if (pacote.hoteis.length > 0) {
-    // pontoInteresseImagem = pacote.hoteis[0].imagem;
+  if (pacote.hoteis.length > 0 && pacote.hoteis[0].imagem) {
+    pontoInteresseImagem = pacote.hoteis[0].imagem;
     pontoInteresseTitulo = pacote.hoteis[0].nome;
     pontoInteresseSubtitulo = pacote.hoteis[0].descricao;
   }
   // Se o tipo de visita for 'restaurante'
-  else if (pacote.restaurantes.length > 0) {
-    // pontoInteresseImagem = pacote.restaurantes[0].imagem;
+  else if (pacote.restaurantes.length > 0 && pacote.restaurantes[0].imagem) {
+    pontoInteresseImagem = pacote.restaurantes[0].imagem;
     pontoInteresseTitulo = pacote.restaurantes[0].nome;
     pontoInteresseSubtitulo = `Especialidade: ${pacote.restaurantes[0].especialidade}`;
   }
   // Se o tipo de visita for 'pontoTuristico'
-  else if (pacote.pontos_turisticos.length > 0) {
-    // pontoInteresseImagem = pacote.pontos_turisticos[0].imagem;
+  else if (
+    pacote.pontos_turisticos.length > 0 &&
+    pacote.pontos_turisticos[0].imagem
+  ) {
+    pontoInteresseImagem = pacote.pontos_turisticos[0].imagem;
     pontoInteresseTitulo = pacote.pontos_turisticos[0].nome;
     pontoInteresseSubtitulo = pacote.pontos_turisticos[0].descricao;
   }
@@ -85,14 +92,15 @@ const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
             {/* Renderiza o card da cidade */}
             <Grid item key="cidade" xs={12} sm={6}>
               <Card className={classes.card}>
-                <CardMedia
-                  className={classes.cardMedia}
-                  image={
-                    // pacote.cidade.imagem ||
-                    "https://demofree.sirv.com/nope-not-here.jpg"
+                <img
+                  src={
+                    pontoInteresseImagem
+                      ? `data:image/png;base64, ${cidadeImagem}`
+                      : "https://demofree.sirv.com/nope-not-here.jpg"
                   }
-                  title={pacote.cidade.nome}
+                  alt="Imagem da cidade"
                 />
+
                 <CardContent className={classes.cardContent}>
                   <Typography gutterBottom variant="h5">
                     {pacote.cidade.nome}
@@ -105,14 +113,15 @@ const Detalhes = ({ pacote, onAdd, goBack, isLogged }) => {
             {/* Renderiza o card do ponto de interesse */}
             <Grid item key="pontoInteresse" xs={12} sm={6}>
               <Card className={classes.card}>
-                <CardMedia
-                  className={classes.cardMedia}
-                  image={
-                    pontoInteresseImagem ||
-                    "https://demofree.sirv.com/nope-not-here.jpg"
+                <img
+                  src={
+                    pontoInteresseImagem
+                      ? `data:image/png;base64, ${pontoInteresseImagem}`
+                      : "https://demofree.sirv.com/nope-not-here.jpg"
                   }
-                  title={pontoInteresseTitulo}
+                  alt="Imagem do Hotel"
                 />
+
                 <CardContent className={classes.cardContent}>
                   <Typography gutterBottom variant="h5">
                     {pontoInteresseTitulo}

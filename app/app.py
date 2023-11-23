@@ -20,6 +20,12 @@ db = SQLAlchemy()
 db.init_app(app)
 jwt = JWTManager(app)
 
+UPLOAD_FOLDER = './imagens_app'
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Mapeamento do Banco de dados para SQLAlchemy
 
@@ -265,8 +271,9 @@ def login():
         return jsonify({'access_token': access_token}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
-@app.route('/visitas', methods=['GET'])
+@app.route('/visitas', methods=['POST'])
 def get_visitas():
+    data = request.json
     # visitas = Visita.query.all()  # Obtém todas as visitas
     visitas = Visita.query.options(db.joinedload(Visita.cidade)).all()
     resultado = []
@@ -300,27 +307,49 @@ def get_visitas():
         pontos_turisticos = PontoTuristico.query.filter_by(codigo_visita=visita.codigo).all()
 
         for hotel in hoteis:
-            detalhes_visita['hoteis'].append({
-                'nome': hotel.nome,
-                # 'categoria': hotel.categoria,
-                'imagem': hotel.imagem  # assumindo que temos um campo nome no modelo de Hotel, que é incorreto com base na estrutura atual, por favor adicione se necessário
-            })
+            if hotel.imagem:
+                detalhes_visita['hoteis'].append({
+                    'nome': hotel.nome,
+                    'imagem': base64.b64encode(hotel.imagem).decode('utf-8')
+                })
+            else:
+                detalhes_visita['hoteis'].append({
+                    'nome': hotel.nome,
+                    'imagem' : None
+                })
+                
 
         for restaurante in restaurantes:
-            detalhes_visita['restaurantes'].append({
-                'nome': restaurante.nome,
-                'preco_medio': restaurante.preco_medio,
-                'especialidade': restaurante.especialidade,
-                'categoria': restaurante.categoria,
-                'imagem': restaurante.imagem
-            })
+            if restaurante.imagem:
+                detalhes_visita['restaurantes'].append({
+                    'nome': restaurante.nome,
+                    'preco_medio': restaurante.preco_medio,
+                    'especialidade': restaurante.especialidade,
+                    'categoria': restaurante.categoria,
+                    'imagem': base64.b64encode(restaurante.imagem).decode('utf-8')
+                })
+            else:
+                detalhes_visita['restaurantes'].append({
+                    'nome': restaurante.nome,
+                    'preco_medio': restaurante.preco_medio,
+                    'especialidade': restaurante.especialidade,
+                    'categoria': restaurante.categoria,
+                    'imagem': None
+                })
 
         for ponto_turistico in pontos_turisticos:
-            detalhes_visita['pontos_turisticos'].append({
-                'nome': ponto_turistico.nome,
-                'descricao': ponto_turistico.descricao,
-                'imagem': ponto_turistico.imagem
-            })
+            if ponto_turistico.imagem:
+                detalhes_visita['pontos_turisticos'].append({
+                    'nome': ponto_turistico.nome,
+                    'descricao': ponto_turistico.descricao,
+                    'imagem': base64.b64encode(ponto_turistico.imagem).decode('utf-8')
+                })
+            else:
+                detalhes_visita['pontos_turisticos'].append({
+                    'nome': ponto_turistico.nome,
+                    'descricao': ponto_turistico.descricao,
+                    'imagem': None
+                })
 
         resultado.append(detalhes_visita)
 
@@ -490,12 +519,19 @@ def add_hotel():
     nome = request.form.get('nome')
     categoria = request.form.get('categoria')
     descricao = request.form.get('descricao')
-    imagem = request.files['imagem'] if 'imagem' in request.files else None
     cidadeAssociada = request.form.get('cidadeAssociada')
     cidade = Cidade.query.filter_by(nome=cidadeAssociada).first()
 
+
     if nome and categoria and descricao:
-        novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, imagem=imagem, cidade_associada=cidade.codigo)
+        novo_hotel = Hotel(nome=nome, categoria=categoria, descricao=descricao, cidade_associada=cidade.codigo)
+        
+        if "imagem" in request.files:
+            imagem = request.files["imagem"]
+            imagem_nome = secure_filename(imagem.filename)
+            imagem_bin = imagem.read()
+            novo_hotel.imagem = imagem_bin
+        
         db.session.add(novo_hotel)
         db.session.commit()
         return jsonify({'message': 'Hotel cadastrado com sucesso'}), 201
@@ -569,11 +605,15 @@ def add_restaurante():
     cidadeAssociada = request.form.get('cidadeAssociada')
     cidade = Cidade.query.filter_by(nome=cidadeAssociada).first()
 
-    imagem = request.files['imagem'] if 'imagem' in request.files else None
 
     if nome and especialidade and preco_medio and categoria and descricao:
         novo_restaurante = Restaurante(nome=nome, especialidade=especialidade, preco_medio=preco_medio,
-                                       categoria=categoria, descricao=descricao, imagem=imagem, cidade_associada=cidade.codigo)
+                                       categoria=categoria, descricao=descricao, cidade_associada=cidade.codigo)
+        if "imagem" in request.files:
+            imagem = request.files["imagem"]
+            imagem_nome = secure_filename(imagem.filename)
+            imagem_bin = imagem.read()
+            novo_restaurante.imagem = imagem_bin
         db.session.add(novo_restaurante)
         db.session.commit()
         return jsonify({'message': 'Restaurante cadastrado com sucesso'}), 201

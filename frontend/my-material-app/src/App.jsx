@@ -49,8 +49,6 @@ const App = () => {
   const [cidadeSelecionada, setCidadeSelecionada] = useState(null);
   const [pacotesFiltrados, setPacotesFiltrados] = useState([]);
 
-  
-
   const handleBuscarClick = () => {
     // Se cidadeSelecionada for null, não faz nada
     if (!cidadeSelecionada) {
@@ -112,9 +110,24 @@ const App = () => {
 
   useEffect(() => {
     // Função para carregar os pacotes.
+
+    // const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
     const fetchPacotes = async () => {
       try {
-        const response = await fetch("/visitas"); // Seu endpoint deve corresponder à configuração do seu servidor.
+        const response = await fetch("/visitas", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            /* seus dados aqui */
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao carregar pacotes");
+        }
+
         const data = await response.json();
         console.log("Visitas [App.jsx]: ", data);
         setPacotes(data); // Atualizando o estado com os dados recebidos.
@@ -384,13 +397,23 @@ const App = () => {
                 <Card className={classes.card}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <CardMedia
+                      {/* <CardMedia
                         className={classes.cardMedia}
                         image={
-                          pacote.imagem ||
-                          "https://demofree.sirv.com/nope-not-here.jpg"
+                          pacote.imagem
+                            ? `data:image/jpeg;base64,${pacote.cidade.imagem}` // Assumindo que a imagem é salva como Base64
+                            : "https://demofree.sirv.com/nope-not-here.jpg"
                         }
                         title={pacote.nome}
+                      /> */}
+                      <img
+                        src={
+                          pacote.cidade.imagem
+                            ? `data:image/png;base64, ${pacote.cidade.imagem}`
+                            : "https://demofree.sirv.com/nope-not-here.jpg"
+                        }
+                        alt="Imagem da cidade"
+                        style={{ width: '215px', height: '200px',objectFit: 'cover'  }}
                       />
                     </Grid>
 
