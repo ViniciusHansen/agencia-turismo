@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
   footer: {
     padding: "50px 0",
   },
+
 }));
 
 export default useStyles;
