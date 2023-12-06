@@ -629,8 +629,13 @@ def add_ponto_turistico():
 
     imagem = request.files['imagem'] if 'imagem' in request.files else None
 
+    imagem = request.files['imagem'] if 'imagem' in request.files else None
+
+
+    
     if nome and descricao:
-        novo_ponto_turistico = PontoTuristico(nome=nome, descricao=descricao, imagem=imagem,cidade_associada=cidade.codigo)
+        imagem_blob = imagem.read() if imagem else None  # Ou converta para Base64 se o banco exigir
+        novo_ponto_turistico = PontoTuristico(nome=nome, descricao=descricao, imagem=imagem_blob,cidade_associada=cidade.codigo)
         db.session.add(novo_ponto_turistico)
         db.session.commit()
         return jsonify({'message': 'Ponto turístico cadastrado com sucesso'}), 201
